@@ -18,6 +18,14 @@ const config = {
   extraMetadata: {
     version: process.env.VITE_APP_VERSION,
   },
+  protocols: [
+    {
+        'name': 'SIOP',
+        'schemes': [
+            'openid',
+        ],
+    },
+ ],
 };
 
 module.exports = config;

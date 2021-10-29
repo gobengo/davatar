@@ -1,4 +1,4 @@
-import {contextBridge} from 'electron';
+import {contextBridge, ipcRenderer} from 'electron';
 
 const apiKey = 'electron';
 /**
@@ -6,6 +6,17 @@ const apiKey = 'electron';
  */
 const api: ElectronApi = {
   versions: process.versions,
+  onOpenUrl(cb) {
+    const eecb = (event: Electron.Event, url: string) => {
+      cb(url);
+    };
+    ipcRenderer.on('open-url', eecb);
+    return {
+      unsubscribe() {
+        return ipcRenderer.off('open-url', eecb);
+      },
+    };
+  },
 };
 
 /**

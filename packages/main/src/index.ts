@@ -2,6 +2,13 @@ import {app, BrowserWindow} from 'electron';
 import {join} from 'path';
 import {URL} from 'url';
 
+const OPENID_PROTOCOL = 'openid';
+const isOpenidDefaultProtocolClient = app.isDefaultProtocolClient(OPENID_PROTOCOL);
+console.log({ isOpenidDefaultProtocolClient });
+
+if (!isOpenidDefaultProtocolClient) {
+  app.setAsDefaultProtocolClient(OPENID_PROTOCOL);
+}
 
 const isSingleInstance = app.requestSingleInstanceLock();
 
@@ -58,8 +65,17 @@ const createWindow = async () => {
     ? import.meta.env.VITE_DEV_SERVER_URL
     : new URL('../renderer/dist/index.html', 'file://' + __dirname).toString();
 
+  if ( ! pageUrl) {
+    throw new Error('missing pageUrl');
+  }
 
   await mainWindow.loadURL(pageUrl);
+
+  app.on('open-url', (event, url) => {
+    console.log('electron open-url', url);
+    console.log('emittingg open-url on ipcMain');
+    mainWindow?.webContents.send('open-url', url);
+  });
 };
 
 
