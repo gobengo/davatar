@@ -3,18 +3,16 @@ import {join} from 'path';
 import {URL} from 'url';
 
 const OPENID_PROTOCOL = 'openid';
-const isOpenidDefaultProtocolClient = app.isDefaultProtocolClient(OPENID_PROTOCOL);
-console.log({ isOpenidDefaultProtocolClient });
-
-if (!isOpenidDefaultProtocolClient) {
-  app.setAsDefaultProtocolClient(OPENID_PROTOCOL);
-}
 
 const isSingleInstance = app.requestSingleInstanceLock();
 
 if (!isSingleInstance) {
   app.quit();
   process.exit(0);
+}
+
+if (!app.isDefaultProtocolClient(OPENID_PROTOCOL)) {
+  app.setAsDefaultProtocolClient(OPENID_PROTOCOL);
 }
 
 app.disableHardwareAcceleration();
@@ -71,15 +69,33 @@ const createWindow = async () => {
 
   await mainWindow.loadURL(pageUrl);
 
-  app.on('open-url', (event, url) => {
-    console.log('electron open-url', url);
-    console.log('emittingg open-url on ipcMain');
-    mainWindow?.webContents.send('open-url', url);
+  // app.on('open-url', (event, url) => {
+  //   event.preventDefault()
+  //   console.log('davatar main app open-url', url)
+  //   if (mainWindow) {
+  //     console.log('emitting open-url on ipcMain', { url });
+  //     mainWindow.webContents.send('open-url', url);
+  //   }
+  // });
+  app.on('open-file', (event, path) => {
+    console.log('open-file', { path });
   });
+  const webContents = mainWindow.webContents;
+  const handleRedirect = (e: any, url: string) => {
+    console.log('davatar main handleRedirect', { url });
+    if(url != webContents.getURL()) {
+      e.preventDefault();
+      require('electron').shell.openExternal(url);
+    }
+  };
+  
+  webContents.on('will-navigate', handleRedirect);
+  webContents.on('new-window', handleRedirect);
 };
 
 
 app.on('second-instance', () => {
+  console.log('second-instance');
   // Someone tried to run a second instance, we should focus our window.
   if (mainWindow) {
     if (mainWindow.isMinimized()) mainWindow.restore();
@@ -99,6 +115,13 @@ app.whenReady()
   .then(createWindow)
   .catch((e) => console.error('Failed create window:', e));
 
+app.on('open-url', (event, url) => {
+  event.preventDefault();
+  if (mainWindow) {
+    console.log('sending open-url to mainWindow.webContents');
+    mainWindow.webContents.send('open-url', url);
+  }
+});
 
 // Auto-updates
 if (import.meta.env.PROD) {
