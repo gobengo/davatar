@@ -1,157 +1,253 @@
-import * as React from "react"
-import { useLocation } from "react-router"
-import { Link } from "react-router-dom";
-import * as tweetnacl from "tweetnacl";
+import * as React from "react";
+import { useLocation } from "react-router";
 import * as didJwt from "did-jwt";
-import {JWK, base64url, calculateJwkThumbprint} from "jose";
+import { calculateJwkThumbprint } from "jose";
+import { AuthenticationSubject } from "../authentication-types";
+import {
+  Ed25519JWKPublicKey,
+} from "../modules/jwk-ed25519";
+import { createDidKeyDid } from "../modules/did-key-ed25519";
+
+type ClaimsDescriptor = Record<
+  string,
+  null | {
+    essential?: boolean;
+    value?: string;
+    values?: string[];
+  }
+>;
+
+interface AuthenticationRequestClaims {
+  id_token?: ClaimsDescriptor;
+  userinfo?: ClaimsDescriptor;
+}
 
 class AuthenticationRequest {
-    constructor(
-        public response_type: string,
-        public client_id: string,
-        public redirect_uri: string,
-        public scope: string,
-        public state: string,
-        public nonce: string,
-    ) {}
+  constructor(
+    public response_type: string,
+    public client_id: string,
+    public redirect_uri: string,
+    public scope: string,
+    public state: string,
+    public nonce: string,
+    public claims: AuthenticationRequestClaims | undefined
+  ) {}
 
-    static fromUrl(searchParams: URLSearchParams) {
-        return new AuthenticationRequest(
-            searchParams.get('response_type') || '',
-            searchParams.get('client_id') || '',
-            searchParams.get('redirect_uri') || '',
-            searchParams.get('scope') || '',
-            searchParams.get('state') || '',
-            searchParams.get('nonce') || '',
-        );
-    }
+  static fromUrl(searchParams: URLSearchParams) {
+    return new AuthenticationRequest(
+      searchParams.get("response_type") || "",
+      searchParams.get("client_id") || "",
+      searchParams.get("redirect_uri") || "",
+      searchParams.get("scope") || "",
+      searchParams.get("state") || "",
+      searchParams.get("nonce") || "",
+      (() => {
+        const claimsSearchParam = searchParams.get("claims");
+        return claimsSearchParam && JSON.parse(claimsSearchParam);
+      })()
+    );
+  }
 }
 
 interface AuthenticationResponse {
-    state: string
-    id_token: string
+  state: string;
+  id_token: string;
 }
 function createSendResponseUrl(
-    authenticationRequest: AuthenticationRequest,
-    authenticationResponse: AuthenticationResponse,
+  authenticationRequest: AuthenticationRequest,
+  authenticationResponse: AuthenticationResponse
 ): URL {
-    let sendResponseUri = new URL(authenticationRequest.redirect_uri)
-    const responseSearchParams = new URLSearchParams
-    for (const [k,v] of Object.entries(authenticationResponse)) {
-        responseSearchParams.set(k,v)
-    }
-    sendResponseUri.hash = responseSearchParams.toString()
-    return sendResponseUri
+  let sendResponseUri = new URL(authenticationRequest.redirect_uri);
+  const responseSearchParams = new URLSearchParams();
+  for (const [k, v] of Object.entries(authenticationResponse)) {
+    responseSearchParams.set(k, v);
+  }
+  sendResponseUri.hash = responseSearchParams.toString();
+  return sendResponseUri;
 }
 
 function respondToAuthenticationRequest(
-    req: AuthenticationRequest,
-    id_token: string,
+  req: AuthenticationRequest,
+  id_token: string
 ): AuthenticationResponse {
-    return {
-        state: req.state,
-        id_token,
-    }
+  return {
+    state: req.state,
+    id_token,
+  };
 }
 
-type EpochSecondsDatetime = number
+type EpochSecondsDatetime = number;
 
 interface IdTokenClaims {
-    iss: string
-    sub: string
-    aud: string
-    exp: EpochSecondsDatetime
-    iat: EpochSecondsDatetime
-    nonce?: string
+  iss: string;
+  sub: string;
+  aud: string;
+  exp: EpochSecondsDatetime;
+  iat: EpochSecondsDatetime;
+  nonce?: string;
 }
 
-type Signer = (data: ArrayBuffer) => Promise<ArrayBuffer>
-
-// ex https://github.com/panva/jose/blob/6de381213d552e798d9dfa007d4bd08918b0320e/test-cloudflare-workers/cloudflare.test.mjs#L272
-function ed25519JWK(keyPair: tweetnacl.SignKeyPair): JWK {
-    const jwk: JWK = {
-        kty: 'OKP',
-        crv: 'Ed25519',
-        x: base64url.encode(keyPair.publicKey),
-        d: base64url.encode(keyPair.secretKey),
-    }
-    return jwk; 
-}
+type SignFunction = (data: ArrayBuffer) => Promise<ArrayBuffer>;
 
 async function createIdToken(
-    claims: IdTokenClaims,
+  claims: IdTokenClaims & Record<string, any>,
+  signer: {
+    jwk: Ed25519JWKPublicKey;
+    sign(data: ArrayBuffer): Promise<ArrayBuffer>;
+  }
 ): Promise<string> {
-    const keyPair = tweetnacl.sign.keyPair()
-    const signer = didJwt.EdDSASigner(keyPair.secretKey)
-    const jwk = ed25519JWK(keyPair)
-    const jwkThumbprint = await calculateJwkThumbprint(jwk)
-    const jwt = didJwt.createJWT(
-        {...claims, sub: jwkThumbprint},
-        { issuer: claims.iss, signer },
-        { alg: 'EdDSA'}
-    )
-    return jwt
+  const jwkThumbprint = await calculateJwkThumbprint(signer.jwk);
+  const kid: string = await createDidKeyDid(signer.jwk);
+  const jwt = didJwt.createJWT(
+    { ...claims, sub: jwkThumbprint, sub_jwk: signer.jwk },
+    {
+      issuer: claims.iss,
+      signer: async (data) => {
+        const dataBytes =
+          typeof data === "string" ? new TextEncoder().encode(data) : data;
+        const sig = await signer.sign(dataBytes);
+        return new TextDecoder().decode(sig);
+      },
+    },
+    { alg: "EdDSA", kid }
+  );
+  return jwt;
 }
 
-function AuthenticationRequestReceiverScreen() {
-    const location = useLocation()
-    const authenticationRequest = React.useMemo(
-        () => AuthenticationRequest.fromUrl(new URLSearchParams(location.search)),
-        [location.search],
-    )
-    type Identity = { id: string }
-    const currentSubjectKeyPair = tweetnacl.sign.keyPair()
-    const currentSubject: Identity & {sign:Signer} = {
-        id: 'did:web:bengo.co',
-        async sign(data) {
-            const signer = didJwt.EdDSASigner(currentSubjectKeyPair.secretKey)
-            const sig1 = await signer(new Uint8Array(data))
-            if (typeof sig1 !== 'string') { throw new Error('unexpected sig1 ')}
-            const sig2 = (new TextEncoder).encode(sig1)
-            return sig2
-        }
-    }
-    const [idToken, setIdToken] = React.useState<string>()
-    React.useEffect(
-        () => {
-            (async () => {
-                const idToken: string = await createIdToken({
-                    iss: "https://self-issued.me/v2",
-                    aud: authenticationRequest.client_id,
-                    iat: Number(new Date),
-                    exp: Number(new Date) + (60 * 5), // 5 minutes
-                    sub: currentSubject.id,
-                    nonce: authenticationRequest.nonce,
-                })
-                setIdToken(idToken)
-            })()
+function jwtDecode(jwt: string) {
+  const [header, payload] = jwt
+    .split(".")
+    .slice(0, 2)
+    .map((b) => {
+      return JSON.parse(atob(b));
+    });
+  return { header, payload };
+}
+
+function AuthenticationRequestReceiverScreen(props: {
+  authenticationSubject: AuthenticationSubject;
+}) {
+  const { authenticationSubject } = props;
+  const [formClaims, setFormClaims] = React.useState<Record<string, string>>();
+  const location = useLocation();
+  const authenticationRequest = React.useMemo(
+    () => AuthenticationRequest.fromUrl(new URLSearchParams(location.search)),
+    [location.search]
+  );
+  const [idToken, setIdToken] = React.useState<string>();
+  React.useEffect(() => {
+    (async () => {
+      const idToken: string = await createIdToken(
+        {
+          iss: "https://self-issued.me",
+          aud: authenticationRequest.client_id,
+          iat: Number(new Date()),
+          exp: Number(new Date()) + 60 * 5, // 5 minutes
+          sub: authenticationSubject.id,
+          nonce: authenticationRequest.nonce,
+          did: authenticationSubject.id,
+          ...formClaims,
         },
-        [authenticationRequest.client_id, authenticationRequest.nonce]
-    )
-
-    const sendResponseUrl = idToken && createSendResponseUrl(
-        authenticationRequest,
-        respondToAuthenticationRequest(authenticationRequest, idToken)
-    )
-    return <>
-    AuthenticationRequestReceiverScreen
-    <pre>{JSON.stringify(authenticationRequest, null, 2)}</pre>
-
-    <h2>respond</h2>
-    <ul>
-        <li>
-            id_token: {idToken}
-            <ul>
-                <li>id_token claims<pre>{idToken && JSON.stringify(didJwt.decodeJWT(idToken), null, 2)}</pre></li>
-            </ul>
-        </li>
-        {sendResponseUrl && <>
-            <li>url: <a target="_blank" href={sendResponseUrl.toString()}>{sendResponseUrl.toString()}</a></li>        
-        </>}
-    </ul>
-
-    <Link to="/">Home</Link>
+        authenticationSubject.signer
+      );
+      setIdToken(idToken);
+    })();
+  }, [
+    authenticationRequest.client_id,
+    authenticationRequest.nonce,
+    formClaims,
+  ]);
+  const authenticationResponse =
+    idToken && respondToAuthenticationRequest(authenticationRequest, idToken);
+  const sendResponseUrl =
+    authenticationResponse &&
+    createSendResponseUrl(authenticationRequest, authenticationResponse);
+  function sendAuthenticationResponse() {
+    if (sendResponseUrl) {
+      window.open(sendResponseUrl.toString(), "_blank");
+    }
+  }
+  return (
+    <>
+      <details>
+        <summary>Authentication</summary>
+        <pre>
+          {JSON.stringify(
+            {
+              request: authenticationRequest,
+              response: authenticationResponse,
+              idTokenDecoded: idToken && jwtDecode(idToken),
+            },
+            null,
+            2
+          )}
+        </pre>
+      </details>
+      {authenticationRequest.claims && (
+        <>
+          <form>
+            <ClaimsFormInputs
+              claims={authenticationRequest.claims.id_token || {}}
+              onChange={(claims) => setFormClaims(claims)}
+            />
+          </form>
+        </>
+      )}
+      <button onClick={sendAuthenticationResponse}>Authenticate</button>
     </>
+  );
 }
 
-export default AuthenticationRequestReceiverScreen
+function ClaimsFormInputs(props: {
+  claims: ClaimsDescriptor;
+  onChange: (claims: Record<string, string>) => void;
+}) {
+  type ClaimsFormAction = { type: "changeClaim"; claim: string; value: any };
+  const initialState = Object.entries(props.claims).reduce(
+    (acc, [claimName, claimDescriptor]) => {
+      acc[claimName] = "";
+      return acc;
+    },
+    {} as Record<string, any>
+  );
+  const [state, dispatch] = React.useReducer(
+    (state: Record<string, any>, action: ClaimsFormAction) => {
+      const newState = {
+        ...state,
+        [action.claim]: action.value,
+      };
+      return newState;
+    },
+    initialState
+  );
+  React.useEffect(() => {
+    props.onChange(state);
+  }, [state]);
+  return (
+    <>
+      <dl>
+        {Object.entries(props.claims).map(([claimName, claimDescriptor]) => (
+          <span key={claimName}>
+            <dt>{claimName}</dt>
+            <dd>
+              <input
+                type="text"
+                name={claimName}
+                value={state[claimName]}
+                onChange={({ target }) =>
+                  dispatch({
+                    type: "changeClaim",
+                    claim: claimName,
+                    value: target.value,
+                  })
+                }
+              ></input>
+            </dd>
+          </span>
+        ))}
+      </dl>
+    </>
+  );
+}
+
+export default AuthenticationRequestReceiverScreen;

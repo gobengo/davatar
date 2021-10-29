@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "allowJs": false,
     "module": "esnext",
     "target": "esnext",
     "sourceMap": true,

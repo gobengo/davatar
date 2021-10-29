@@ -1,7 +1,6 @@
 import {app, BrowserWindow} from 'electron';
 import {join} from 'path';
 import {URL} from 'url';
-
 const OPENID_PROTOCOL = 'openid';
 
 const isSingleInstance = app.requestSingleInstanceLock();
@@ -130,4 +129,3 @@ if (import.meta.env.PROD) {
     .then(({autoUpdater}) => autoUpdater.checkForUpdatesAndNotify())
     .catch((e) => console.error('Failed check updates:', e));
 }
-
