@@ -4,14 +4,15 @@ import Form from '@rjsf/material-ui';
 import type { ISettings } from './service-settings';
 import { SettingsSchema, exampleEd25519KeyPair2020 } from './service-settings';
 
-const emptySettings: ISettings = {
+const EmptySettings = (): ISettings => ({
   keyPairs: [],
-};
+});
 
 export default function DavatarSettingsScreen(props: {
   initialSettings?: ISettings;
   onSettingsChange?: (settings: ISettings) => void;
 }) {
+  console.log('DavatarSettingsScreen', props);
   type Action =
     | { type: 'setFormData'; payload: ISettings }
     | { type: 'importExampleDidKeyPair' };
@@ -29,20 +30,24 @@ export default function DavatarSettingsScreen(props: {
           };
           break;
       }
-      const { onSettingsChange } = props;
-      if (onSettingsChange) {
-        console.log('onSettingsChange', newState);
-        onSettingsChange(newState);
-      }
       return newState;
     },
-    props.initialSettings || emptySettings,
+    props.initialSettings || EmptySettings(),
   );
+  const [settingsVersion, setSettingsVersion] = React.useState(0);
   React.useEffect(() => {
-    if (props.onSettingsChange) {
-      props.onSettingsChange(settings);
-    }
+    setSettingsVersion(x => x + 1);
   }, [settings]);
+  React.useEffect(
+    () => {
+      if (settingsVersion > 1) {
+        if (props.onSettingsChange) {
+          props.onSettingsChange(settings);
+        }
+      }
+    },
+    [settingsVersion],
+  );
   function importExampleKeyPair() {
     dispatch({
       type: 'importExampleDidKeyPair',
@@ -52,14 +57,19 @@ export default function DavatarSettingsScreen(props: {
     <>
       <span data-test-id="davatar-screen-settings"></span>
       <Form
+        liveValidate={true}
         schema={SettingsSchema as JSONSchema7}
         formData={settings}
-        onChange={(event) =>
+        onChange={(event) => {
+          if (event.errors.length) {
+            console.debug('form changed, but there are errors. Wont setFormData', event);
+            return;
+          }
           dispatch({
             type: 'setFormData',
             payload: event.formData,
-          })
-        }
+          });
+        }}
       ></Form>
 
       <h2>Debugging</h2>

@@ -3,6 +3,8 @@ import { assert } from 'chai';
 import type * as electronPath from 'electron';
 import { _electron as electron } from 'playwright';
 import { ElectronAppContext } from '../contexts/ElectronAppContext';
+import type { ElementHandle } from 'playwright-testing-library/dist/typedefs';
+import { getDocument, queries } from 'playwright-testing-library';
 
 interface IWindowState {
   isVisible: boolean
@@ -10,10 +12,19 @@ interface IWindowState {
   isCrashed: boolean
 }
 
-@binding([ElectronAppContext])
+class TestingLibraryContext {
+  document: null | ElementHandle = null
+}
+
+@binding([
+  ElectronAppContext,
+  TestingLibraryContext,
+])
 export class ElectronAppSteps {
   constructor(
-    protected appContext: ElectronAppContext  ) {}
+    protected appContext: ElectronAppContext,
+    protected testingLibrary: TestingLibraryContext,
+  ) {}
 
   @after()
   public async afterCloseApp() {
@@ -63,8 +74,12 @@ export class ElectronAppSteps {
     const element = await page.$('#app', {strict: true});
     assert.notStrictEqual(element, null, 'Can\'t find root element');
 
-    // const body = await page.$('body');
-    // console.log({ html: await body?.innerHTML() });
+    const document = await getDocument(page);
+    this.testingLibrary.document = document;
+
+    // make sure App is rendered and can find via testing-library
+    const foundByTestId = await queries.getByTestId(document, 'davatar-renderer-app');
+    assert.ok(foundByTestId);
   }
 
   @then(/I see an element from the davatar electron html template/)

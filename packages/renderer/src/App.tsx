@@ -94,6 +94,7 @@ function App() {
   return (
     <>
       <div data-test-id="davatar-renderer-app"></div>
+      <div data-testid="davatar-renderer-app"></div>
       <HashRouter>
         <AuthenticationRequestRouter />
         {/* <RouteInfo /> */}
@@ -111,7 +112,7 @@ function App() {
           <Route exact path="/settings">
             <DavatarSettingsScreen
               initialSettings={settingsService.settings}
-              onSettingsChange={s => settingsService.save(s)} />
+              onSettingsChange={s => { console.debug('DavatarSettingsScreen onSettingsChange saving to storage', s); settingsService.save(s); }} />
           </Route>
         </Switch>
         <footer>

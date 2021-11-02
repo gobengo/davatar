@@ -49,6 +49,7 @@
     "eslint": "^7.0.0",
     "lint-staged": "11.2.6",
     "playwright": "1.16.2",
+    "playwright-testing-library": "^4.0.1",
     "rollup-plugin-node-gyp": "^0.1.0",
     "simple-git-hooks": "2.7.0",
     "ts-node": "^10.4.0",
