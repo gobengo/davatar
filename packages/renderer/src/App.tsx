@@ -1,29 +1,16 @@
 import * as React from "react";
-import {
-  HashRouter,
-  Route,
-  useHistory,
-  useLocation,
-} from "react-router-dom";
-import { AuthenticationSubject } from "./authentication-types";
+import { HashRouter, Link, Route, Switch, useHistory } from "react-router-dom";
+import type { AuthenticationSubject } from "./authentication-types";
 import AuthenticationRequestReceiverScreen from "./components/AuthenticationRequestReceiverScreen";
 import { useElectron } from "./use/electron";
 import * as didJwt from "did-jwt";
 import { ed25519PublicKeyJWK } from "./modules/jwk-ed25519";
 import * as tweetnacl from "tweetnacl";
-
-function Home() {
-  return <>WIP: Home Page {location.pathname}</>;
-}
-
-function RouteInfo() {
-  const location = useLocation();
-  return (
-    <>
-      <p>Location: {location.pathname}</p>
-    </>
-  );
-}
+import DavatarHomeScreen from "./modules/davatar-screen-home";
+import DavatarSettingsScreen from "./modules/davatar-screen-settings";
+import { createDidKeyDid } from "./modules/did-key-ed25519";
+import { KeyedLocalstorage } from "./modules/storage";
+import SettingsService from "./modules/service-settings";
 
 function useOpenUrlEvents() {
   const [latestOpenUrlEvent, setLatestOpenUrlEvent] =
@@ -53,7 +40,7 @@ function AuthenticationRequestRouter() {
     }
     if (isSIOPAuthenticationRequest(openedUrl)) {
       const searchParams = new URLSearchParams(
-        Array.from(openedUrl.searchParams.entries())
+        Array.from(openedUrl.searchParams.entries()),
       );
       const authenticationRequestUrl = `/authentication-request?${searchParams.toString()}`;
       history.push(authenticationRequestUrl);
@@ -63,7 +50,7 @@ function AuthenticationRequestRouter() {
 }
 
 async function Ed25519KeySigner(
-  keyPair: tweetnacl.SignKeyPair
+  keyPair: tweetnacl.SignKeyPair,
 ): Promise<AuthenticationSubject["signer"]> {
   return {
     jwk: ed25519PublicKeyJWK(keyPair),
@@ -82,13 +69,23 @@ async function Ed25519KeySigner(
 function App() {
   const [authenticationSubject, setAuthenticationSubject] =
     React.useState<AuthenticationSubject>();
+  const settingsStorage = KeyedLocalstorage({
+    localStorage,
+    key: 'settings',
+  });
+  const settingsService = new SettingsService({
+    json: settingsStorage.read() ?? undefined,
+    onChange: (s) => {
+      settingsStorage.write(JSON.stringify(s));
+    },
+  });
   React.useEffect(() => {
     if (!authenticationSubject) {
       (async () => {
         const keyPair = tweetnacl.sign.keyPair();
         const signer = await Ed25519KeySigner(keyPair);
         setAuthenticationSubject({
-          id: "did:web:bengo.co",
+          id: await createDidKeyDid(ed25519PublicKeyJWK(keyPair)),
           signer,
         });
       })();
@@ -96,20 +93,31 @@ function App() {
   }, [authenticationSubject]);
   return (
     <>
-      <header>
-        <h1>davatar</h1>
-      </header>
+      <div data-test-id="davatar-renderer-app"></div>
       <HashRouter>
         <AuthenticationRequestRouter />
         {/* <RouteInfo /> */}
-        <Route exact path="/" component={Home} />
-        <Route exact path="/authentication-request">
-          {authenticationSubject && (
-            <AuthenticationRequestReceiverScreen
-              authenticationSubject={authenticationSubject}
-            />
-          )}
-        </Route>
+        <Switch>
+          <Route exact path="/">
+            <DavatarHomeScreen />
+          </Route>
+          <Route exact path="/authentication-request">
+            {authenticationSubject && (
+              <AuthenticationRequestReceiverScreen
+                authenticationSubject={authenticationSubject}
+              />
+            )}
+          </Route>
+          <Route exact path="/settings">
+            <DavatarSettingsScreen
+              initialSettings={settingsService.settings}
+              onSettingsChange={s => settingsService.save(s)} />
+          </Route>
+        </Switch>
+        <footer>
+          <hr />
+          <Link to="/">Home</Link>
+        </footer>
       </HashRouter>
     </>
   );

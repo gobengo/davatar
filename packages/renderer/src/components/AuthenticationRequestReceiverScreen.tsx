@@ -2,10 +2,8 @@ import * as React from "react";
 import { useLocation } from "react-router";
 import * as didJwt from "did-jwt";
 import { calculateJwkThumbprint } from "jose";
-import { AuthenticationSubject } from "../authentication-types";
-import {
-  Ed25519JWKPublicKey,
-} from "../modules/jwk-ed25519";
+import type { AuthenticationSubject } from "../authentication-types";
+import type { Ed25519JWKPublicKey } from "../modules/jwk-ed25519";
 import { createDidKeyDid } from "../modules/did-key-ed25519";
 
 type ClaimsDescriptor = Record<
@@ -30,7 +28,7 @@ class AuthenticationRequest {
     public scope: string,
     public state: string,
     public nonce: string,
-    public claims: AuthenticationRequestClaims | undefined
+    public claims: AuthenticationRequestClaims | undefined,
   ) {}
 
   static fromUrl(searchParams: URLSearchParams) {
@@ -44,7 +42,7 @@ class AuthenticationRequest {
       (() => {
         const claimsSearchParam = searchParams.get("claims");
         return claimsSearchParam && JSON.parse(claimsSearchParam);
-      })()
+      })(),
     );
   }
 }
@@ -55,9 +53,9 @@ interface AuthenticationResponse {
 }
 function createSendResponseUrl(
   authenticationRequest: AuthenticationRequest,
-  authenticationResponse: AuthenticationResponse
+  authenticationResponse: AuthenticationResponse,
 ): URL {
-  let sendResponseUri = new URL(authenticationRequest.redirect_uri);
+  const sendResponseUri = new URL(authenticationRequest.redirect_uri);
   const responseSearchParams = new URLSearchParams();
   for (const [k, v] of Object.entries(authenticationResponse)) {
     responseSearchParams.set(k, v);
@@ -68,7 +66,7 @@ function createSendResponseUrl(
 
 function respondToAuthenticationRequest(
   req: AuthenticationRequest,
-  id_token: string
+  id_token: string,
 ): AuthenticationResponse {
   return {
     state: req.state,
@@ -87,14 +85,12 @@ interface IdTokenClaims {
   nonce?: string;
 }
 
-type SignFunction = (data: ArrayBuffer) => Promise<ArrayBuffer>;
-
 async function createIdToken(
-  claims: IdTokenClaims & Record<string, any>,
+  claims: IdTokenClaims & Record<string, unknown>,
   signer: {
     jwk: Ed25519JWKPublicKey;
     sign(data: ArrayBuffer): Promise<ArrayBuffer>;
-  }
+  },
 ): Promise<string> {
   const jwkThumbprint = await calculateJwkThumbprint(signer.jwk);
   const kid: string = await createDidKeyDid(signer.jwk);
@@ -109,7 +105,7 @@ async function createIdToken(
         return new TextDecoder().decode(sig);
       },
     },
-    { alg: "EdDSA", kid }
+    { alg: "EdDSA", kid },
   );
   return jwt;
 }
@@ -128,11 +124,11 @@ function AuthenticationRequestReceiverScreen(props: {
   authenticationSubject: AuthenticationSubject;
 }) {
   const { authenticationSubject } = props;
-  const [formClaims, setFormClaims] = React.useState<Record<string, string>>();
+  const [formClaims, setFormClaims] = React.useState<Record<string, unknown>>();
   const location = useLocation();
   const authenticationRequest = React.useMemo(
     () => AuthenticationRequest.fromUrl(new URLSearchParams(location.search)),
-    [location.search]
+    [location.search],
   );
   const [idToken, setIdToken] = React.useState<string>();
   React.useEffect(() => {
@@ -141,14 +137,14 @@ function AuthenticationRequestReceiverScreen(props: {
         {
           iss: "https://self-issued.me",
           aud: authenticationRequest.client_id,
-          iat: Number(new Date()),
-          exp: Number(new Date()) + 60 * 5, // 5 minutes
+          iat: Date.now() / 1000,
+          exp: Date.now() / 1000 + 60 * 5, // 5 minutes
           sub: authenticationSubject.id,
           nonce: authenticationRequest.nonce,
           did: authenticationSubject.id,
           ...formClaims,
         },
-        authenticationSubject.signer
+        authenticationSubject.signer,
       );
       setIdToken(idToken);
     })();
@@ -179,7 +175,7 @@ function AuthenticationRequestReceiverScreen(props: {
               idTokenDecoded: idToken && jwtDecode(idToken),
             },
             null,
-            2
+            2,
           )}
         </pre>
       </details>
@@ -200,25 +196,25 @@ function AuthenticationRequestReceiverScreen(props: {
 
 function ClaimsFormInputs(props: {
   claims: ClaimsDescriptor;
-  onChange: (claims: Record<string, string>) => void;
+  onChange: (claims: Record<string, unknown>) => void;
 }) {
-  type ClaimsFormAction = { type: "changeClaim"; claim: string; value: any };
+  type ClaimsFormAction = { type: "changeClaim"; claim: string; value: unknown };
   const initialState = Object.entries(props.claims).reduce(
-    (acc, [claimName, claimDescriptor]) => {
+    (acc, [claimName]) => {
       acc[claimName] = "";
       return acc;
     },
-    {} as Record<string, any>
+    {} as Record<string, unknown>,
   );
   const [state, dispatch] = React.useReducer(
-    (state: Record<string, any>, action: ClaimsFormAction) => {
+    (state: Record<string, unknown>, action: ClaimsFormAction) => {
       const newState = {
         ...state,
         [action.claim]: action.value,
       };
       return newState;
     },
-    initialState
+    initialState,
   );
   React.useEffect(() => {
     props.onChange(state);
@@ -226,14 +222,14 @@ function ClaimsFormInputs(props: {
   return (
     <>
       <dl>
-        {Object.entries(props.claims).map(([claimName, claimDescriptor]) => (
+        {Object.entries(props.claims).map(([claimName]) => (
           <span key={claimName}>
             <dt>{claimName}</dt>
             <dd>
               <input
                 type="text"
                 name={claimName}
-                value={state[claimName]}
+                value={String(state[claimName])}
                 onChange={({ target }) =>
                   dispatch({
                     type: "changeClaim",

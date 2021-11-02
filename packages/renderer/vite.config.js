@@ -2,8 +2,8 @@
 
 import {chrome} from '../../electron-vendors.config.json';
 import {join} from 'path';
-import {builtinModules} from 'module';
 import react from '@vitejs/plugin-react';
+import builtins from 'rollup-plugin-node-builtins';
 
 const PACKAGE_ROOT = __dirname;
 
@@ -34,8 +34,9 @@ const config = {
     outDir: 'dist',
     assetsDir: '.',
     rollupOptions: {
-      external: [
-        ...builtinModules,
+      plugins: [
+        // nodePolyfills(),
+        { ...builtins({ crypto: true }), name: 'rollup-plugin-node-builtins' },
       ],
     },
     emptyOutDir: true,

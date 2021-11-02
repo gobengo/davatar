@@ -1,10 +1,12 @@
 {
   "compilerOptions": {
     "allowJs": false,
+    "experimentalDecorators": true,
     "module": "esnext",
     "target": "esnext",
     "sourceMap": true,
     "moduleResolution": "Node",
+    "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": true,
     "isolatedModules": true,
