@@ -29,8 +29,9 @@ export class SettingsSteps {
             this.playwrightContext,
         );
     }
-    @when(/I navigate to settings/i)
-    public async whenINavigateToSettings () {
+    @when(/(I|the user) navigates? to settings/i)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    public async whenINavigateToSettings (actor: string) {
         const page = await this.electronAppContext.app?.firstWindow();
         assertTruthy(page);
         await page.click('text=settings');
@@ -66,5 +67,16 @@ export class SettingsSteps {
     public async whenThePageIsRefreshed () {
         const controller = this.keyController;
         await controller.refresh();
+    }
+
+    @when('the user imports a sample keyPair')
+    public async whenTheUserImportsASampleKeyPair() {
+        await this.keyController.importSampleKeyPair();
+    }
+
+    @then('a keyPair is visible')
+    public async thenAKeyPairIsVisible() {
+        const keys = await this.keyController.getKeys();
+        assert.equal(keys.length, 1);
     }
 }

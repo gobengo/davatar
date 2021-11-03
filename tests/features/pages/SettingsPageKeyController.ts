@@ -83,4 +83,14 @@ export default class SettingsPageKeyController {
     await page.reload();
     await new Promise((resolve) => setTimeout(resolve, 1000));
   }
+
+  /**
+   * Make use of the Settings Page's affordance to 'Import Sample Key Pair'
+   */
+  public async importSampleKeyPair() {
+      const document = await this.testingLibrary.getDocument();
+      assertTruthy(document);
+      const importButton = await this.queries.getByText(document, 'Import Example KeyPair');
+      await importButton.click();
+  }
 }
