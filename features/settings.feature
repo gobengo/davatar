@@ -9,5 +9,5 @@ Feature: Settings
   Scenario: Adding a Key
     Given a running app
     When I navigate to Settings
-    When I add a key named scenarioAddKey
-    Then I see a key named scenarioAddKey
+    When I add a key named 'scenarioAddKey'
+    Then I see a key named 'scenarioAddKey'

@@ -35,18 +35,18 @@ export class SettingsSteps {
         assert.ok(settingsScreen);
     }
 
-    @when('I add a key named scenarioAddKey')
-    public async whenIAddAKey() {
+    @when('I add a key named {string}')
+    public async whenIAddAKey(keyName: string) {
         const controller = new SettingsPageKeyController(this.testingLibrary);
-        await controller.addKey({ name: 'scenarioAddKey' });
+        await controller.addKey({ name: keyName });
     }
 
-    @then('I see a key named scenarioAddKey')
-    public async thenISeeAKey() {
+    @then('I see a key named {string}')
+    public async thenISeeAKey(keyName: string) {
         const controller = new SettingsPageKeyController(this.testingLibrary);
         const keys = await controller.getKeys();
         // await controller.addKey({ name: 'scenarioAddKey' });
-        assert.equal(keys[0]?.name, 'scenarioAddKey');
+        assert.equal(keys[0]?.name, keyName);
     }
 
 }
