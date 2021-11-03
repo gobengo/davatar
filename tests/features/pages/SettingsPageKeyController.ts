@@ -1,23 +1,22 @@
 import type { ElementHandle } from "playwright-testing-library/dist/typedefs";
 import { assertTruthy } from "../../../packages/renderer/src/modules/assert";
+import type PlaywrightContext from "../contexts/PlaywrightContext";
 import type TestingLibraryContext from "../contexts/TestingLibraryContext";
 
 export default class SettingsPageKeyController {
     document: ElementHandle
     queries: TestingLibraryContext['queries']
-    addKeyButton: Promise<ElementHandle>
     constructor(
         private testingLibrary: TestingLibraryContext,
+        private playwrightContext: PlaywrightContext,
     ) {
         assertTruthy(testingLibrary.document);
         this.document = testingLibrary.document;
         this.queries = testingLibrary.queries;
-        this.addKeyButton = this.queries.getByText(this.document, 'Add Item');
-        this.addKeyButton = this.queries.getByText(this.document, 'Add Item');
     }
     public async addKey(key: { name: string }) {
         // click add key button
-        await (await this.addKeyButton).click();
+        await (await this.queries.getByText(this.document, 'Add Item')).click();
         // find new form
         const nameInputs = await this.queries.queryAllByLabelText(this.document, 'name');
         const nameInput = nameInputs[nameInputs.length-1];
@@ -35,5 +34,10 @@ export default class SettingsPageKeyController {
         }));
         console.log({ keys });
         return keys;
+    }
+    public async refresh() {
+        const { page } = this.playwrightContext;
+        assertTruthy(page);
+        await page.reload();
     }
 }

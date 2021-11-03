@@ -5,6 +5,7 @@ import { _electron as electron } from 'playwright';
 import { ElectronAppContext } from '../contexts/ElectronAppContext';
 import { getDocument, queries } from 'playwright-testing-library';
 import TestingLibraryContext from '../contexts/TestingLibraryContext';
+import PlaywrightContext from '../contexts/PlaywrightContext';
 
 interface IWindowState {
   isVisible: boolean
@@ -15,11 +16,13 @@ interface IWindowState {
 @binding([
   ElectronAppContext,
   TestingLibraryContext,
+  PlaywrightContext,
 ])
 export class ElectronAppSteps {
   constructor(
     protected appContext: ElectronAppContext,
     protected testingLibrary: TestingLibraryContext,
+    protected playwright: PlaywrightContext,
   ) {}
 
   @after()
@@ -65,6 +68,7 @@ export class ElectronAppSteps {
      * @type {Page}
      */
     const page = await electronApp.firstWindow();
+    this.playwright.page = page;
 
     // Check web-page content
     const element = await page.$('#app', {strict: true});

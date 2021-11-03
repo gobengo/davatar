@@ -3,6 +3,7 @@ import { assert } from 'chai';
 import { ElectronAppContext } from '../contexts/ElectronAppContext';
 import TestingLibraryContext from '../contexts/TestingLibraryContext';
 import SettingsPageKeyController from '../pages/SettingsPageKeyController';
+import PlaywrightContext from '../contexts/PlaywrightContext';
 
 function assertTruthy(value: unknown): asserts value {
     if (! value) {
@@ -13,12 +14,20 @@ function assertTruthy(value: unknown): asserts value {
 @binding([
     ElectronAppContext,
     TestingLibraryContext,
+    PlaywrightContext,
 ])
 export class SettingsSteps {
+    keyController: SettingsPageKeyController
+
     constructor(
         protected electronAppContext: ElectronAppContext,
         protected testingLibrary: TestingLibraryContext,
+        protected playwrightContext: PlaywrightContext,
     ){
+        this.keyController = new SettingsPageKeyController(
+            this.testingLibrary,
+            this.playwrightContext,
+        );
     }
     @when(/I navigate to settings/i)
     public async whenINavigateToSettings () {
@@ -37,16 +46,20 @@ export class SettingsSteps {
 
     @when('I add a key named {string}')
     public async whenIAddAKey(keyName: string) {
-        const controller = new SettingsPageKeyController(this.testingLibrary);
-        await controller.addKey({ name: keyName });
+        await this.keyController.addKey({ name: keyName });
     }
 
     @then('I see a key named {string}')
     public async thenISeeAKey(keyName: string) {
-        const controller = new SettingsPageKeyController(this.testingLibrary);
+        const controller = this.keyController;
         const keys = await controller.getKeys();
         // await controller.addKey({ name: 'scenarioAddKey' });
         assert.equal(keys[0]?.name, keyName);
     }
 
+    @when('the page is refreshed')
+    public async whenThePageIsRefreshed () {
+        const controller = this.keyController;
+        await controller.refresh();
+    }
 }
