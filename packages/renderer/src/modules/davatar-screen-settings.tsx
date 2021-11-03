@@ -3,6 +3,7 @@ import type { JSONSchema7 } from 'json-schema';
 import Form from '@rjsf/material-ui';
 import type { ISettings } from './service-settings';
 import { SettingsSchema, exampleEd25519KeyPair2020 } from './service-settings';
+import type { FieldTemplateProps } from '@rjsf/core';
 
 const EmptySettings = (): ISettings => ({
   keyPairs: [],
@@ -12,7 +13,6 @@ export default function DavatarSettingsScreen(props: {
   initialSettings?: ISettings;
   onSettingsChange?: (settings: ISettings) => void;
 }) {
-  console.log('DavatarSettingsScreen', props);
   type Action =
     | { type: 'setFormData'; payload: ISettings }
     | { type: 'importExampleDidKeyPair' };
@@ -60,6 +60,13 @@ export default function DavatarSettingsScreen(props: {
         liveValidate={true}
         schema={SettingsSchema as JSONSchema7}
         formData={settings}
+        uiSchema={{
+          keyPairs: {
+            items: {
+              'ui:FieldTemplate': KeyPairItemTemplate,
+            },
+          },
+        }}
         onChange={(event) => {
           if (event.errors.length) {
             console.debug('form changed, but there are errors. Wont setFormData', event);
@@ -75,5 +82,19 @@ export default function DavatarSettingsScreen(props: {
       <h2>Debugging</h2>
       <button onClick={importExampleKeyPair}>Import Example KeyPair</button>
     </>
+  );
+}
+
+/** to add the data-testid so tests can find it */
+function KeyPairItemTemplate(props: FieldTemplateProps) {
+  const {id, classNames, label, help, required, description, errors, children} = props;
+  return (
+    <div className={classNames} data-testid="keypair-form">
+      <label htmlFor={id}>{label}{required ? "*" : null}</label>
+      {description}
+      {children}
+      {errors}
+      {help}
+    </div>
   );
 }

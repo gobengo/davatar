@@ -1,16 +1,30 @@
 import { binding, then, when } from 'cucumber-tsflow';
 import { assert } from 'chai';
 import { ElectronAppContext } from '../contexts/ElectronAppContext';
+import TestingLibraryContext from '../contexts/TestingLibraryContext';
+import SettingsPageKeyController from '../pages/SettingsPageKeyController';
 
-@binding([ElectronAppContext])
+function assertTruthy(value: unknown): asserts value {
+    if (! value) {
+        throw new Error('value must be defined');
+    }
+}
+
+@binding([
+    ElectronAppContext,
+    TestingLibraryContext,
+])
 export class SettingsSteps {
     constructor(
         protected electronAppContext: ElectronAppContext,
-    ){}
+        protected testingLibrary: TestingLibraryContext,
+    ){
+    }
     @when(/I navigate to settings/i)
     public async whenINavigateToSettings () {
         const page = await this.electronAppContext.app?.firstWindow();
-        await page?.click('text=settings');
+        assertTruthy(page);
+        await page.click('text=settings');
     }
 
     @then(/I see the settings screen/i)
@@ -20,4 +34,19 @@ export class SettingsSteps {
         const settingsScreen = page?.locator(selector);
         assert.ok(settingsScreen);
     }
+
+    @when('I add a key named scenarioAddKey')
+    public async whenIAddAKey() {
+        const controller = new SettingsPageKeyController(this.testingLibrary);
+        await controller.addKey({ name: 'scenarioAddKey' });
+    }
+
+    @then('I see a key named scenarioAddKey')
+    public async thenISeeAKey() {
+        const controller = new SettingsPageKeyController(this.testingLibrary);
+        const keys = await controller.getKeys();
+        // await controller.addKey({ name: 'scenarioAddKey' });
+        assert.equal(keys[0]?.name, 'scenarioAddKey');
+    }
+
 }

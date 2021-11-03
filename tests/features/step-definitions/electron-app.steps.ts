@@ -3,17 +3,13 @@ import { assert } from 'chai';
 import type * as electronPath from 'electron';
 import { _electron as electron } from 'playwright';
 import { ElectronAppContext } from '../contexts/ElectronAppContext';
-import type { ElementHandle } from 'playwright-testing-library/dist/typedefs';
 import { getDocument, queries } from 'playwright-testing-library';
+import TestingLibraryContext from '../contexts/TestingLibraryContext';
 
 interface IWindowState {
   isVisible: boolean
   isDevToolsOpened: boolean
   isCrashed: boolean
-}
-
-class TestingLibraryContext {
-  document: null | ElementHandle = null
 }
 
 @binding([
