@@ -36,6 +36,12 @@ export class ElectronAppSteps {
   @given(/a running app/)
   public async givenAnOpenElectronApp() {
     const electronApp = await electron.launch({args: [__dirname+'/../../../']});
+    await electronApp.evaluate(
+      ({ BrowserWindow }) => {
+        const mainWindow = BrowserWindow.getAllWindows()[0];
+        mainWindow.webContents.session.clearStorageData();
+      },
+    );
     /**
      * App main window state
      * @type {{isVisible: boolean; isDevToolsOpened: boolean; isCrashed: boolean}}
@@ -75,7 +81,9 @@ export class ElectronAppSteps {
     assert.notStrictEqual(element, null, 'Can\'t find root element');
 
     const document = await getDocument(page);
-    this.testingLibrary.document = document;
+    this.testingLibrary.getDocument = async () => {
+      return await getDocument(page);
+    };
 
     // make sure App is rendered and can find via testing-library
     const foundByTestId = await queries.getByTestId(document, 'davatar-renderer-app');

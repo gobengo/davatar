@@ -64,6 +64,9 @@ export default function DavatarSettingsScreen(props: {
           keyPairs: {
             items: {
               'ui:FieldTemplate': KeyPairItemTemplate,
+              type: {
+                'ui:FieldTemplate': KeyPairTypeTemplate,
+              },
             },
           },
         }}
@@ -87,10 +90,22 @@ export default function DavatarSettingsScreen(props: {
 
 /** to add the data-testid so tests can find it */
 function KeyPairItemTemplate(props: FieldTemplateProps) {
-  const {id, classNames, label, help, required, description, errors, children} = props;
+  const {classNames, help, description, errors, children} = props;
   return (
     <div className={classNames} data-testid="keypair-form">
-      <label htmlFor={id}>{label}{required ? "*" : null}</label>
+      {description}
+      {children}
+      {errors}
+      {help}
+    </div>
+  );
+}
+
+/** to add the data-testid so tests can find it */
+function KeyPairTypeTemplate(props: FieldTemplateProps) {
+  const {classNames, help, description, errors, children} = props;
+  return (
+    <div className={classNames} data-testid="keypair-form-type">
       {description}
       {children}
       {errors}

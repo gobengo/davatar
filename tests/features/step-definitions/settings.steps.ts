@@ -46,7 +46,12 @@ export class SettingsSteps {
 
     @when('I add a key named {string}')
     public async whenIAddAKey(keyName: string) {
-        await this.keyController.addKey({ name: keyName });
+        await this.keyController.addKey({
+            name: keyName,
+            type: 'Ed25519KeyPair2020',
+            publicKeyMultibase: 'a',
+            privateKeyMultibase: 'a',
+        });
     }
 
     @then('I see a key named {string}')

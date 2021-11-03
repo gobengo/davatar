@@ -2,6 +2,6 @@ import type { ElementHandle, Queries } from "playwright-testing-library/dist/typ
 import { queries } from "playwright-testing-library";
 
 export default class TestingLibraryContext {
-    document: null | ElementHandle = null
+    async getDocument(): Promise<null | ElementHandle> { return null; }
     queries: Queries = queries
 }
