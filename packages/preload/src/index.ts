@@ -17,6 +17,17 @@ const api: ElectronApi = {
       },
     };
   },
+  onAppControlMessage(cb) {
+    const listener = (event: Electron.Event, message: AppControlMessage) => {
+      cb(message);
+    };
+    ipcRenderer.on('davatar', listener);
+    return {
+      unsubscribe() {
+        return ipcRenderer.off('davatar', listener);
+      },
+    };
+  },
 };
 
 /**

@@ -125,6 +125,7 @@ app
   .catch((e) => console.error("Failed create window:", e));
 
 app.on("open-url", (event, url) => {
+  console.log('open-url', url);
   event.preventDefault();
   if (mainWindow) {
     console.log("sending open-url to mainWindow.webContents");

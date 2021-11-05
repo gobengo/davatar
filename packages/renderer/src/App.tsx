@@ -11,6 +11,7 @@ import DavatarSettingsScreen from "./modules/davatar-screen-settings";
 import { createDidKeyDid } from "./modules/did-key-ed25519";
 import { KeyedLocalstorage } from "./modules/storage";
 import SettingsService from "./modules/service-settings";
+import { OidcTester } from "./modules/oidc-tester";
 
 function useOpenUrlEvents() {
   const [latestOpenUrlEvent, setLatestOpenUrlEvent] =
@@ -66,6 +67,44 @@ async function Ed25519KeySigner(
   };
 }
 
+function useAppControlMessages() {
+  const {onAppControlMessage} = useElectron();
+  const [latestMessageEvent, setLatestMessageEvent] = React.useState<AppControlMessage>();
+  React.useEffect(
+    () => {
+      function listener(message: AppControlMessage) {
+        console.log('onAppControlMessage listener', message);
+        setLatestMessageEvent(message);
+      }
+      const { unsubscribe } = onAppControlMessage(listener);
+      return () => {
+        console.log('useAppControlMessages unsubscribing');
+        unsubscribe();
+      };
+    },
+    [],
+  );
+  return { latestMessageEvent };
+}
+
+function AppControlMessageHandler() {
+  const history = useHistory();
+  const { latestMessageEvent } = useAppControlMessages();
+  React.useEffect(
+    () => {
+      console.log('latestMessageEvent', latestMessageEvent);
+      switch(latestMessageEvent?.type) {
+        case "NavigateToOidcTester":
+          console.log('App handling NavigateToOidcTester control message by history.push /oidc-tester');
+          history.push('/oidc-tester');
+          break;
+      }
+    },
+    [latestMessageEvent],
+  );
+  return <></>;
+}
+
 function App() {
   const [authenticationSubject, setAuthenticationSubject] =
     React.useState<AuthenticationSubject>();
@@ -96,6 +135,7 @@ function App() {
       <div data-test-id="davatar-renderer-app"></div>
       <div data-testid="davatar-renderer-app"></div>
       <HashRouter>
+        <AppControlMessageHandler />
         <AuthenticationRequestRouter />
         {/* <RouteInfo /> */}
         <Switch>
@@ -113,6 +153,9 @@ function App() {
             <DavatarSettingsScreen
               initialSettings={settingsService.settings}
               onSettingsChange={s => { console.debug('DavatarSettingsScreen onSettingsChange saving to storage', s); settingsService.save(s); }} />
+          </Route>
+          <Route exact path="/oidc-tester">
+            <OidcTester />
           </Route>
         </Switch>
         <footer>

@@ -22,5 +22,6 @@ Feature: Settings
     When the user navigates to Settings
     When the user imports a sample keyPair
     Then a keyPair is visible
+    # And test persistence
     When the page is refreshed
     Then a keyPair is visible

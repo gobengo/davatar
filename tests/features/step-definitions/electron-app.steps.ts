@@ -33,11 +33,20 @@ export class ElectronAppSteps {
     }
   }
 
+  @given('devtools are open')
+  public async givenDevToolsAreOpen() {
+    await this.appContext.app?.evaluate(async (E) => {
+      const mainWindow = E.BrowserWindow.getAllWindows()[0];
+      mainWindow.webContents.openDevTools();
+    });
+  }
+
   @given(/a running app/)
   public async givenAnOpenElectronApp() {
     const electronApp = await electron.launch({args: [__dirname+'/../../../']});
     await electronApp.evaluate(
-      ({ BrowserWindow }) => {
+      (options) => {
+        const { BrowserWindow } = options;
         const mainWindow = BrowserWindow.getAllWindows()[0];
         mainWindow.webContents.session.clearStorageData();
       },
@@ -49,6 +58,9 @@ export class ElectronAppSteps {
     const windowState: IWindowState = await electronApp.evaluate(({BrowserWindow}) => {
       const mainWindow = BrowserWindow.getAllWindows()[0];
       function getWindowState(mainWindow: electronPath.BrowserWindow): IWindowState {
+        if (mainWindow.webContents.isDevToolsOpened()) {
+          mainWindow.webContents.closeDevTools();
+        }
         return ({
           isVisible: mainWindow.isVisible(),
           isDevToolsOpened: mainWindow.webContents.isDevToolsOpened(),
