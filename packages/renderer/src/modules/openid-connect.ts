@@ -1,4 +1,5 @@
 import type { JWK } from "jose";
+import { assertTruthy } from "./assert";
 
 export type ResponseType = 'id_token' | 'code' | 'token'
 
@@ -80,6 +81,23 @@ export class AuthenticationRequest implements AuthenticationRequest {
 }
 
 export interface AuthenticationResponse {
-  state: string;
+  state?: string;
   id_token: string;
+}
+
+export class AuthenticationResponse implements AuthenticationResponse {
+  constructor(
+    public id_token: string,
+    public state?: string,
+  ){}
+
+  static fromUrl(searchParams: URLSearchParams) {
+    const state = searchParams.get('state') ?? undefined;
+    const id_token = searchParams.get('id_token');
+    assertTruthy(id_token);
+    return new AuthenticationResponse(
+      id_token,
+      state,
+    );
+  }
 }

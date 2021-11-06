@@ -2,7 +2,9 @@ import { base64url } from "jose";
 import * as React from "react";
 import { Route, useLocation, useRouteMatch } from "react-router";
 import { assertTruthy } from "./assert";
+import { useAuthentication } from "./authentication-react";
 import type { AuthenticationRequest, ClientRegistration } from "./openid-connect";
+import { AuthenticationResponse } from "./openid-connect";
 
 /**
  * React Component that helps test an OpenID Connect (i.e. OIDC) Provider
@@ -62,10 +64,30 @@ export function OidcTester(props: {
 }
 
 function RedirectUriHandler() {
+  const authentication = useAuthentication();
   const location = useLocation();
   const hashParams = React.useMemo(
     () => new URLSearchParams(location.hash.replace(/^#/, "")),
     [location.hash]
+  );
+  const authenticationResponse = React.useMemo(
+    () => {
+      try {
+        return AuthenticationResponse.fromUrl(new URLSearchParams(location.hash.replace(/^#/, "")));
+      } catch (error) {
+        console.debug('error creating AuthenticationResponse fromUrl. Ignoring.', error);
+      }
+    },
+    [location.hash],
+  );
+  React.useEffect(
+    () => {
+      if (authenticationResponse) {
+        authentication.actions.handleAuthenticationResponse(authenticationResponse);
+        // authentication.response = authenticationResponse;
+      }
+    },
+    [authenticationResponse]
   );
   const hashParamsObj = React.useMemo(
     () => Object.fromEntries(hashParams.entries()),

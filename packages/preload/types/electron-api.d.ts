@@ -1,5 +1,7 @@
 type AppControlMessage =
 | { type: 'NavigateToOidcTester' }
+| { type: 'Navigate', payload: { href: string }}
+;
 
 interface ElectronApi {
   readonly versions: Readonly<NodeJS.ProcessVersions>
