@@ -17,3 +17,9 @@ Feature: OpenID Connect
         Given the user has navigated to OIDC Tester
         When the user initiates authentication
         Then the user sees the authentication flow
+        When the user authorizes authentication
+        Then the user sees an AuthenticationResponse
+        Then the user sees an id_token
+        Then the id_token is self-issued
+        Then the id_token has a did claim
+        Then the id_token has sub and sub_jwk claims

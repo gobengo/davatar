@@ -28,7 +28,7 @@ class AuthenticationRequest {
     public scope: string,
     public state: string,
     public nonce: string,
-    public claims: AuthenticationRequestClaims | undefined,
+    public claims: AuthenticationRequestClaims | undefined
   ) {}
 
   static fromUrl(searchParams: URLSearchParams) {
@@ -42,7 +42,7 @@ class AuthenticationRequest {
       (() => {
         const claimsSearchParam = searchParams.get("claims");
         return claimsSearchParam && JSON.parse(claimsSearchParam);
-      })(),
+      })()
     );
   }
 }
@@ -51,9 +51,10 @@ interface AuthenticationResponse {
   state: string;
   id_token: string;
 }
+
 function createSendResponseUrl(
   authenticationRequest: AuthenticationRequest,
-  authenticationResponse: AuthenticationResponse,
+  authenticationResponse: AuthenticationResponse
 ): URL {
   const sendResponseUri = new URL(authenticationRequest.redirect_uri);
   const responseSearchParams = new URLSearchParams();
@@ -66,7 +67,7 @@ function createSendResponseUrl(
 
 function respondToAuthenticationRequest(
   req: AuthenticationRequest,
-  id_token: string,
+  id_token: string
 ): AuthenticationResponse {
   return {
     state: req.state,
@@ -95,7 +96,7 @@ async function createIdToken(
   const jwkThumbprint = await calculateJwkThumbprint(signer.jwk);
   const kid: string = await createDidKeyDid(signer.jwk);
   const jwt = didJwt.createJWT(
-    { ...claims, sub: jwkThumbprint, sub_jwk: signer.jwk },
+    { ...claims, sub: jwkThumbprint, sub_jwk: { ...signer.jwk, kid } },
     {
       issuer: claims.iss,
       signer: async (data) => {
@@ -105,7 +106,7 @@ async function createIdToken(
         return new TextDecoder().decode(sig);
       },
     },
-    { alg: "EdDSA", kid },
+    { alg: "EdDSA", kid }
   );
   return jwt;
 }
@@ -128,7 +129,7 @@ function AuthenticationRequestReceiverScreen(props: {
   const location = useLocation();
   const authenticationRequest = React.useMemo(
     () => AuthenticationRequest.fromUrl(new URLSearchParams(location.search)),
-    [location.search],
+    [location.search]
   );
   const [idToken, setIdToken] = React.useState<string>();
   React.useEffect(() => {
@@ -144,7 +145,7 @@ function AuthenticationRequestReceiverScreen(props: {
           did: authenticationSubject.id,
           ...formClaims,
         },
-        authenticationSubject.signer,
+        authenticationSubject.signer
       );
       setIdToken(idToken);
     })();
@@ -179,7 +180,7 @@ function AuthenticationRequestReceiverScreen(props: {
               idTokenDecoded: idToken && jwtDecode(idToken),
             },
             null,
-            2,
+            2
           )}
         </pre>
       </details>
@@ -202,13 +203,17 @@ function ClaimsFormInputs(props: {
   claims: ClaimsDescriptor;
   onChange: (claims: Record<string, unknown>) => void;
 }) {
-  type ClaimsFormAction = { type: "changeClaim"; claim: string; value: unknown };
+  type ClaimsFormAction = {
+    type: "changeClaim";
+    claim: string;
+    value: unknown;
+  };
   const initialState = Object.entries(props.claims).reduce(
     (acc, [claimName]) => {
       acc[claimName] = "";
       return acc;
     },
-    {} as Record<string, unknown>,
+    {} as Record<string, unknown>
   );
   const [state, dispatch] = React.useReducer(
     (state: Record<string, unknown>, action: ClaimsFormAction) => {
@@ -218,7 +223,7 @@ function ClaimsFormInputs(props: {
       };
       return newState;
     },
-    initialState,
+    initialState
   );
   React.useEffect(() => {
     props.onChange(state);

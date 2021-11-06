@@ -8,6 +8,7 @@ import PlaywrightContext from '../contexts/PlaywrightContext';
 import { assertTruthy } from '../../../packages/renderer/src/modules/assert';
 import type { Page } from 'playwright-core';
 import OidcTesterPageController from '../pages/OidcTesterPageController';
+import { base64url, calculateJwkThumbprint } from 'jose';
 const fetch = require('node-fetch').default;
 // import fetch from 'node-fetch';
 
@@ -63,6 +64,63 @@ export class OpenIDConnectSteps {
         assert.equal(Boolean(testid), true);
     }
 
+    protected async readAuthenticationResponse() {
+        const document = await this.testingLibrary.getDocument();
+        assertTruthy(document);
+        const idTokenEl = await this.testingLibrary.queries.getByTestId(document, 'AuthenticationResponse');
+        assert.equal(Boolean(idTokenEl), true);
+        const authResponseString = await idTokenEl.innerHTML();
+        const authResponse = JSON.parse(authResponseString);
+        return authResponse;
+    }
+
+    @then('the user sees an AuthenticationResponse')
+    public async thenTheUserSeesAnAuthenticationResponse() {
+        const authResponse = await this.readAuthenticationResponse();
+    }
+
+    @then('the user sees an id_token')
+    public async thenTheUserSeesAnIdToken() {
+        const authResponse = await this.readAuthenticationResponse();
+        const id_token = authResponse?.id_token;
+        assert.ok(id_token);
+        const idTokenClaims = parseIdTokenClaims(authResponse.id_token);
+        assert.ok(idTokenClaims);
+    }
+
+    @then('the id_token is self-issued')
+    public async thenTheIdTokenIsSelfIssued() {
+        const authResponse = await this.readAuthenticationResponse();
+        const claims = parseIdTokenClaims(authResponse.id_token);
+        assert.equal(claims.iss, 'https://self-issued.me');
+    }
+
+    @then('the id_token has a did claim')
+    public async thenTheIdTokenHasADidClaim() {
+        const authResponse = await this.readAuthenticationResponse();
+        const claims = parseIdTokenClaims(authResponse.id_token);
+        const didClaim: string|undefined = claims.did;
+        assert.ok(didClaim);
+        assert.ok(didClaim?.match(/^did:/));
+    }
+
+    @then('the id_token has sub and sub_jwk claims')
+    public async thenTheIdTokenHasSubAndSubJwkClaims() {
+        const authResponse = await this.readAuthenticationResponse();
+        const claims = parseIdTokenClaims(authResponse.id_token);
+        assert.ok(claims.sub);
+        assert.ok(claims.sub_jwk);
+        assert.equal(claims.sub, await calculateJwkThumbprint(claims.sub_jwk), 'sub is jose fingerprint of sub_jwk');
+    }
+
+    @when('the user authorizes authentication')
+    public async whenTheUserAuthorizesAuthentication() {
+        const document = await this.testingLibrary.getDocument();
+        assertTruthy(document);
+        const authButton = await this.testingLibrary.queries.getByText(document, 'Authenticate');
+        await authButton.click();
+    }
+
     @when('the app receives an AuthenticationRequest')
     public async whenAppReceivesAuthenticationRequest() {
         const page = await this.electronAppContext.app?.firstWindow();
@@ -92,4 +150,9 @@ function withAuthenticationRequest(urlIn: URL) {
     url.searchParams.set('type', 'AuthenticationRequest');
     url.searchParams.set('response_type', 'id_token');
     return url;
+}
+
+function parseIdTokenClaims(idToken: string) {
+    const idTokenClaims = JSON.parse((new TextDecoder).decode(base64url.decode(idToken.split('.')[1])));
+    return idTokenClaims;
 }
