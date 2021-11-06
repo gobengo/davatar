@@ -2,15 +2,7 @@ import { base64url } from "jose";
 import * as React from "react";
 import { Route, useLocation, useRouteMatch } from "react-router";
 import { assertTruthy } from "./assert";
-
-interface AuthenticationRequest {
-  response_type: 'id_token'
-  redirect_uri: string
-  state: string
-  client_id: string
-  scope: string
-  nonce: string
-}
+import type { AuthenticationRequest } from "./openid-connect";
 
 /**
  * React Component that helps test an OpenID Connect (i.e. OIDC) Provider
@@ -27,12 +19,16 @@ export function OidcTester(props: { authorizationEndpoint: string }) {
       redirect_uri,
       state: JSON.stringify(state),
       client_id: redirect_uri,
-      scope: '',
+      scope: 'openid did_authn profile',
       nonce: Math.random().toString().slice(2),
+      registration: {
+        redirect_uris: [redirect_uri],
+      },
     };
     const sendAuthenticationRequestUrl = new URL(props.authorizationEndpoint);
     for (const [key, value] of Object.entries(request)) {
-      sendAuthenticationRequestUrl.searchParams.set(key, value);
+      const valueStr = (typeof value === 'string') ? value : JSON.stringify(value);
+      sendAuthenticationRequestUrl.searchParams.set(key, valueStr);
     }
     return sendAuthenticationRequestUrl.toString();
   }, [props.authorizationEndpoint]);

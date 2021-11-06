@@ -5,52 +5,8 @@ import { calculateJwkThumbprint } from "jose";
 import type { AuthenticationSubject } from "../authentication-types";
 import type { Ed25519JWKPublicKey } from "../modules/jwk-ed25519";
 import { createDidKeyDid } from "../modules/did-key-ed25519";
-
-type ClaimsDescriptor = Record<
-  string,
-  null | {
-    essential?: boolean;
-    value?: string;
-    values?: string[];
-  }
->;
-
-interface AuthenticationRequestClaims {
-  id_token?: ClaimsDescriptor;
-  userinfo?: ClaimsDescriptor;
-}
-
-class AuthenticationRequest {
-  constructor(
-    public response_type: string,
-    public client_id: string,
-    public redirect_uri: string,
-    public scope: string,
-    public state: string,
-    public nonce: string,
-    public claims: AuthenticationRequestClaims | undefined
-  ) {}
-
-  static fromUrl(searchParams: URLSearchParams) {
-    return new AuthenticationRequest(
-      searchParams.get("response_type") || "",
-      searchParams.get("client_id") || "",
-      searchParams.get("redirect_uri") || "",
-      searchParams.get("scope") || "",
-      searchParams.get("state") || "",
-      searchParams.get("nonce") || "",
-      (() => {
-        const claimsSearchParam = searchParams.get("claims");
-        return claimsSearchParam && JSON.parse(claimsSearchParam);
-      })()
-    );
-  }
-}
-
-interface AuthenticationResponse {
-  state: string;
-  id_token: string;
-}
+import type { AuthenticationResponse, ClaimsDescriptor } from "../modules/openid-connect";
+import { AuthenticationRequest } from "../modules/openid-connect";
 
 function createSendResponseUrl(
   authenticationRequest: AuthenticationRequest,
