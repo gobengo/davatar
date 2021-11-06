@@ -2,18 +2,37 @@ import { base64url } from "jose";
 import * as React from "react";
 import { Route, useLocation, useRouteMatch } from "react-router";
 import { assertTruthy } from "./assert";
-import type { AuthenticationRequest } from "./openid-connect";
+import type { AuthenticationRequest, ClientRegistration } from "./openid-connect";
 
 /**
  * React Component that helps test an OpenID Connect (i.e. OIDC) Provider
  */
-export function OidcTester(props: { authorizationEndpoint: string }) {
+export function OidcTester(props: {
+  authorizationEndpoint: string
+  registration:
+    Pick<
+      ClientRegistration,
+      |'application_type'
+      |'client_name'
+      |'logo_uri'
+      |'client_uri'
+      |'jwks'
+    >
+}) {
   const { path } = useRouteMatch();
+  const redirect_uri = React.useMemo(() => withoutLocationHash(location.toString()).toString(), [location.toString()]);
   const sendAuthenticationRequestUrl = React.useMemo(() => {
     const state = {
       redirect_uri: "/oidc-tester/redirect_uri",
     };
-    const redirect_uri = withoutLocationHash(location.toString()).toString();
+    const registration: ClientRegistration = {
+      ...props.registration,
+      redirect_uris: [redirect_uri],
+      // #TODO don't use 'none'. It's not allowed in did-siop https://identity.foundation/did-siop/#generate-siop-request
+      request_object_signing_alg: 'none',
+      response_types: ['id_token'],
+      grant_types: ['implicit'],
+    };
     const request: AuthenticationRequest = {
       response_type: "id_token",
       redirect_uri,
@@ -21,9 +40,7 @@ export function OidcTester(props: { authorizationEndpoint: string }) {
       client_id: redirect_uri,
       scope: 'openid did_authn profile',
       nonce: Math.random().toString().slice(2),
-      registration: {
-        redirect_uris: [redirect_uri],
-      },
+      registration,
     };
     const sendAuthenticationRequestUrl = new URL(props.authorizationEndpoint);
     for (const [key, value] of Object.entries(request)) {
@@ -31,7 +48,7 @@ export function OidcTester(props: { authorizationEndpoint: string }) {
       sendAuthenticationRequestUrl.searchParams.set(key, valueStr);
     }
     return sendAuthenticationRequestUrl.toString();
-  }, [props.authorizationEndpoint]);
+  }, [props.authorizationEndpoint, redirect_uri]);
   return (
     <>
       <h1>OidcTester</h1>

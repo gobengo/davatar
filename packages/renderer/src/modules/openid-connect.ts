@@ -1,6 +1,25 @@
+import type { JWK } from "jose";
+
+export type ResponseType = 'id_token' | 'code' | 'token'
+
+export type GrantType = 'authorization_code' | 'implicit' | 'refresh_token'
+
 // https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata
 export interface ClientRegistration {
   redirect_uris: string[]
+  request_object_signing_alg: 'none'
+  // default: ['code']
+  response_types?: Array<ResponseType>
+  //  If omitted, the default is that the Client will use only the authorization_code Grant Type. 
+  grant_types?: Array<GrantType>
+  // default: web
+  application_type?: 'native' | 'web'
+  client_name?: string
+  client_uri?: string
+  logo_uri?: string
+  policy_uri?: string
+  tos_uri?: string
+  jwks?: { keys: Array<JWK> }
 }
 
 export interface AuthenticationRequest {

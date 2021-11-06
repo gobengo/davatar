@@ -5,7 +5,10 @@ import { calculateJwkThumbprint } from "jose";
 import type { AuthenticationSubject } from "../authentication-types";
 import type { Ed25519JWKPublicKey } from "../modules/jwk-ed25519";
 import { createDidKeyDid } from "../modules/did-key-ed25519";
-import type { AuthenticationResponse, ClaimsDescriptor } from "../modules/openid-connect";
+import type {
+  AuthenticationResponse,
+  ClaimsDescriptor,
+} from "../modules/openid-connect";
 import { AuthenticationRequest } from "../modules/openid-connect";
 
 function createSendResponseUrl(
@@ -47,7 +50,7 @@ async function createIdToken(
   signer: {
     jwk: Ed25519JWKPublicKey;
     sign(data: ArrayBuffer): Promise<ArrayBuffer>;
-  },
+  }
 ): Promise<string> {
   const jwkThumbprint = await calculateJwkThumbprint(signer.jwk);
   const kid: string = await createDidKeyDid(signer.jwk);
@@ -126,8 +129,32 @@ function AuthenticationRequestReceiverScreen(props: {
   return (
     <>
       <div data-testid="AuthenticationRequestReceiverScreen"></div>
+      {authenticationRequest.registration && (
+        <>
+          <div>
+            <img width="128" height="128" src={authenticationRequest.registration.logo_uri} />
+            <p>
+              Authenticate for <a href={authenticationRequest.registration.client_uri} target="_blank">
+                {authenticationRequest.registration.client_name}
+              </a>
+              ?
+            </p>
+          </div>
+        </>
+      )}
+      {authenticationRequest.claims && (
+        <>
+          <form>
+            <ClaimsFormInputs
+              claims={authenticationRequest.claims.id_token || {}}
+              onChange={(claims) => setFormClaims(claims)}
+            />
+          </form>
+        </>
+      )}
+      <button onClick={sendAuthenticationResponse}>Authenticate</button>
       <details>
-        <summary>Authentication</summary>
+        <summary>Authentication Details</summary>
         <pre>
           {JSON.stringify(
             {
@@ -140,17 +167,6 @@ function AuthenticationRequestReceiverScreen(props: {
           )}
         </pre>
       </details>
-      {authenticationRequest.claims && (
-        <>
-          <form>
-            <ClaimsFormInputs
-              claims={authenticationRequest.claims.id_token || {}}
-              onChange={(claims) => setFormClaims(claims)}
-            />
-          </form>
-        </>
-      )}
-      <button onClick={sendAuthenticationResponse}>Authenticate</button>
     </>
   );
 }

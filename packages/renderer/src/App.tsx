@@ -195,6 +195,8 @@ function App() {
       })();
     }
   }, [authenticationSubject]);
+  const oidcTesterClientKeyPair = React.useMemo(() => tweetnacl.sign.keyPair(), []);
+  const oidcTesterClientPublicKeyJwk = React.useMemo(() => ed25519PublicKeyJWK(oidcTesterClientKeyPair), [oidcTesterClientKeyPair]);
   return (
     <>
       <div data-test-id="davatar-renderer-app"></div>
@@ -203,7 +205,6 @@ function App() {
         <AuthenticationResponseRouter />
         <AppControlMessageHandler />
         <AuthenticationRequestRouter />
-        {/* <RouteInfo /> */}
         <Switch>
           <Route exact path="/">
             <DavatarHomeScreen />
@@ -223,6 +224,13 @@ function App() {
           <Route path="/oidc-tester">
             <OidcTester
               authorizationEndpoint="openid:"
+              registration={{
+                application_type: 'native',
+                client_name: 'Davatar OidcTester',
+                logo_uri: 'https://i.pravatar.cc/128',
+                client_uri: location.toString(),
+                jwks: {keys:[oidcTesterClientPublicKeyJwk]},
+              }}
               />
           </Route>
         </Switch>
