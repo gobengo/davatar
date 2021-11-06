@@ -49,6 +49,20 @@ export class OpenIDConnectSteps {
         assert.equal(await pageController.isRendered(), true);
     }
 
+    @when('the user initiates authentication')
+    public async whenTheUserInitiatesAuthentication() {
+        const pageController = new OidcTesterPageController(this.testingLibrary);
+        await pageController.authenticate();
+    }
+
+    @then('the user sees the authentication flow')
+    public async thenTheUserSeesTheAuthFlow() {
+        const document = await this.testingLibrary.getDocument();
+        assertTruthy(document);
+        const testid = await this.testingLibrary.queries.getByTestId(document, 'AuthenticationRequestReceiverScreen');
+        assert.equal(Boolean(testid), true);
+    }
+
     @when('the app receives an AuthenticationRequest')
     public async whenAppReceivesAuthenticationRequest() {
         const page = await this.electronAppContext.app?.firstWindow();

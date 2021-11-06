@@ -1,5 +1,5 @@
 import * as React from "react";
-import { HashRouter, Link, Route, Switch, useHistory } from "react-router-dom";
+import { HashRouter, Link, Route, Switch, useHistory, useLocation } from "react-router-dom";
 import type { AuthenticationSubject } from "./authentication-types";
 import AuthenticationRequestReceiverScreen from "./components/AuthenticationRequestReceiverScreen";
 import { useElectron } from "./use/electron";
@@ -15,11 +15,11 @@ import { OidcTester } from "./modules/oidc-tester";
 
 function useOpenUrlEvents() {
   const [latestOpenUrlEvent, setLatestOpenUrlEvent] =
-    React.useState<string | undefined>();
+    React.useState<URL | undefined>();
   const { onOpenUrl } = useElectron();
   React.useEffect(() => {
     const subscription = onOpenUrl((url) => {
-      setLatestOpenUrlEvent(url);
+      setLatestOpenUrlEvent(new URL(url));
     });
     return () => {
       subscription.unsubscribe();
@@ -35,11 +35,12 @@ function AuthenticationRequestRouter() {
     if (!openUrlEvent) {
       return;
     }
-    const openedUrl = new URL(openUrlEvent);
+    const openedUrl = openUrlEvent;
     function isSIOPAuthenticationRequest(url: URL) {
-      return url.searchParams.get("response_type");
+      return url.searchParams.get("response_type") && url.searchParams.get('redirect_uri');
     }
     if (isSIOPAuthenticationRequest(openedUrl)) {
+      console.log('isSIOP request', true);
       const searchParams = new URLSearchParams(
         Array.from(openedUrl.searchParams.entries()),
       );
@@ -47,6 +48,73 @@ function AuthenticationRequestRouter() {
       history.push(authenticationRequestUrl);
     }
   }, [openUrlEvent, history]);
+  return <></>;
+}
+
+type ParsedState = {
+  redirect_uri?: string;
+}
+
+/**
+ * Handle oidc AuthenticationResponse
+ */
+function AuthenticationResponseRouter() {
+  const history = useHistory();
+  const routerLocation = useLocation();
+  console.log('routerLocation', routerLocation);
+  const hashParams = React.useMemo(() => new URLSearchParams(routerLocation.search), [routerLocation.search]);
+  const idToken = React.useMemo(() => hashParams.get('id_token'), [hashParams]);
+  const stateString = React.useMemo(
+    () => {
+      const stateString = hashParams.get('state');
+      return stateString;
+    },
+    [hashParams],
+  );
+  const stateObj = React.useMemo(
+    () => {
+      if ( ! stateString) {
+        return;
+      }
+      let stateObj: unknown;
+      try {
+        stateObj = stateString && JSON.parse(stateString);
+      } catch (error) {
+        console.debug('error parsing potential AuthenticationResponse state. Ignoring because its most likely this isnt an AuthenticationResponse', stateString);
+      }
+      return stateObj;
+    },
+    [stateString],
+  );
+  const stateRedirectUri = React.useMemo(
+    () => {
+      if (stateObj && (typeof (stateObj as ParsedState).redirect_uri === 'string')) {
+        const redirect_uri = (stateObj as ParsedState).redirect_uri;
+        return redirect_uri;
+      }
+    },
+    [stateObj],
+  );
+  React.useEffect(
+    () => {
+      console.log('AuthenticationResponseRouter effect', { stateRedirectUri, idToken });
+      if ( ! idToken) {
+        // this is not a response
+        return;
+      }
+      if (stateRedirectUri) {
+        const paramsWithoutState = new URLSearchParams(Array.from(hashParams.entries()).filter((entry) => {
+          const [key] = entry;
+          if (key === 'state') { return false; }
+          return true;
+        }));
+        const finalUrl = `${stateRedirectUri}#${paramsWithoutState.toString()}`;
+        console.log('routing AuthenticationResponse to ', finalUrl);
+        history.push(finalUrl);
+      }
+    },
+    [stateRedirectUri, idToken],
+  );
   return <></>;
 }
 
@@ -73,12 +141,10 @@ function useAppControlMessages() {
   React.useEffect(
     () => {
       function listener(message: AppControlMessage) {
-        console.log('onAppControlMessage listener', message);
         setLatestMessageEvent(message);
       }
       const { unsubscribe } = onAppControlMessage(listener);
       return () => {
-        console.log('useAppControlMessages unsubscribing');
         unsubscribe();
       };
     },
@@ -92,7 +158,6 @@ function AppControlMessageHandler() {
   const { latestMessageEvent } = useAppControlMessages();
   React.useEffect(
     () => {
-      console.log('latestMessageEvent', latestMessageEvent);
       switch(latestMessageEvent?.type) {
         case "NavigateToOidcTester":
           console.log('App handling NavigateToOidcTester control message by history.push /oidc-tester');
@@ -135,6 +200,7 @@ function App() {
       <div data-test-id="davatar-renderer-app"></div>
       <div data-testid="davatar-renderer-app"></div>
       <HashRouter>
+        <AuthenticationResponseRouter />
         <AppControlMessageHandler />
         <AuthenticationRequestRouter />
         {/* <RouteInfo /> */}
@@ -154,13 +220,16 @@ function App() {
               initialSettings={settingsService.settings}
               onSettingsChange={s => { console.debug('DavatarSettingsScreen onSettingsChange saving to storage', s); settingsService.save(s); }} />
           </Route>
-          <Route exact path="/oidc-tester">
-            <OidcTester />
+          <Route path="/oidc-tester">
+            <OidcTester
+              authorizationEndpoint="openid:"
+              />
           </Route>
         </Switch>
         <footer>
           <hr />
           <Link to="/">Home</Link>
+          <Link to="/oidc-tester">OidcTester</Link>
         </footer>
       </HashRouter>
     </>

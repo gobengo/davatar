@@ -60,7 +60,7 @@ function createSendResponseUrl(
   for (const [k, v] of Object.entries(authenticationResponse)) {
     responseSearchParams.set(k, v);
   }
-  sendResponseUri.hash = responseSearchParams.toString();
+  sendResponseUri.hash = `?` + responseSearchParams.toString();
   return sendResponseUri;
 }
 
@@ -159,12 +159,16 @@ function AuthenticationRequestReceiverScreen(props: {
     authenticationResponse &&
     createSendResponseUrl(authenticationRequest, authenticationResponse);
   function sendAuthenticationResponse() {
-    if (sendResponseUrl) {
-      window.open(sendResponseUrl.toString(), "_blank");
+    const sendResponseUrlString = sendResponseUrl?.toString();
+    if (sendResponseUrlString) {
+      console.log({ sendResponseUrlString });
+      window.location.assign(sendResponseUrlString);
+      // window.open(sendResponseUrlString);
     }
   }
   return (
     <>
+      <div data-testid="AuthenticationRequestReceiverScreen"></div>
       <details>
         <summary>Authentication</summary>
         <pre>

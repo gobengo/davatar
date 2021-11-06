@@ -93,15 +93,20 @@ const createWindow = async () => {
   });
   const webContents = mainWindow.webContents;
   const handleRedirect = (e: Event, url: string) => {
-    console.log("davatar main handleRedirect", { url });
     if (url != webContents.getURL()) {
       e.preventDefault();
       require("electron").shell.openExternal(url);
     }
   };
 
-  // webContents.on('will-navigate', handleRedirect);
-  webContents.on("new-window", handleRedirect);
+  webContents.on('will-navigate', (event, url) => {
+    console.log("davatar main will-navigate", { url });
+    handleRedirect(event, url);
+  });
+  webContents.on("new-window", (event, url) => {
+    console.log("davatar main new-window", { url });
+    handleRedirect(event, url);
+  });
 };
 
 app.on("second-instance", () => {
