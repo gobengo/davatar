@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { binding, given, then, when } from 'cucumber-tsflow';
 import { assert } from 'chai';
-import { ElectronAppContext } from '../contexts/ElectronAppContext';
-import TestingLibraryContext from '../contexts/TestingLibraryContext';
+import { ElectronAppContext } from '../../../packages/renderer/src/modules/davatar-cucumber-contexts/ElectronAppContext';
 import SettingsPageKeyController from '../pages/SettingsPageKeyController';
-import PlaywrightContext from '../contexts/PlaywrightContext';
 import { assertTruthy } from '../../../packages/renderer/src/modules/assert';
 import type { Page } from 'playwright-core';
 import OidcTesterPageController from '../pages/OidcTesterPageController';
 import { base64url, calculateJwkThumbprint } from 'jose';
 import { parseIdTokenClaims } from '../../../packages/renderer/src/modules/openid-connect';
+import TestingLibraryContext from '../../../packages/renderer/src/modules/davatar-cucumber-contexts/TestingLibraryContext';
+import PlaywrightContext from '../../../packages/renderer/src/modules/davatar-cucumber-contexts/PlaywrightContext';
 const fetch = require('node-fetch').default;
 // import fetch from 'node-fetch';
 

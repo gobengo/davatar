@@ -1,9 +1,9 @@
 import { binding, then, when } from 'cucumber-tsflow';
 import { assert } from 'chai';
-import { ElectronAppContext } from '../contexts/ElectronAppContext';
-import TestingLibraryContext from '../contexts/TestingLibraryContext';
+import { ElectronAppContext } from '../../../packages/renderer/src/modules/davatar-cucumber-contexts/ElectronAppContext';
+import TestingLibraryContext from '../../../packages/renderer/src/modules/davatar-cucumber-contexts/TestingLibraryContext';
 import SettingsPageKeyController from '../pages/SettingsPageKeyController';
-import PlaywrightContext from '../contexts/PlaywrightContext';
+import PlaywrightContext from '../../../packages/renderer/src/modules/davatar-cucumber-contexts/PlaywrightContext';
 
 function assertTruthy(value: unknown): asserts value {
     if (! value) {

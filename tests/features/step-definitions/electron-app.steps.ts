@@ -2,10 +2,10 @@ import { binding, given, then, after} from 'cucumber-tsflow';
 import { assert } from 'chai';
 import type * as electronPath from 'electron';
 import { _electron as electron } from 'playwright';
-import { ElectronAppContext } from '../contexts/ElectronAppContext';
+import { ElectronAppContext } from '../../../packages/renderer/src/modules/davatar-cucumber-contexts/ElectronAppContext';
 import { getDocument, queries } from 'playwright-testing-library';
-import TestingLibraryContext from '../contexts/TestingLibraryContext';
-import PlaywrightContext from '../contexts/PlaywrightContext';
+import TestingLibraryContext from '../../../packages/renderer/src/modules/davatar-cucumber-contexts/TestingLibraryContext';
+import PlaywrightContext from '../../../packages/renderer/src/modules/davatar-cucumber-contexts/PlaywrightContext';
 
 interface IWindowState {
   isVisible: boolean
@@ -115,5 +115,11 @@ export class ElectronAppSteps {
   public async thenISeeAnElementFromDavatarRendererApp() {
     const page = await this.appContext.app?.firstWindow();
     await page?.$('*[data-test-id="davatar-renderer-app"]');
+  }
+
+  @then('debug') 
+  public debug() {
+    // eslint-disable-next-line no-debugger
+    debugger;
   }
 }

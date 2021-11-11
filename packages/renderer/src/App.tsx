@@ -18,6 +18,7 @@ import type { IAuthenticationState} from "./modules/authentication-react";
 import { AuthenticationContext} from "./modules/authentication-react";
 import { AuthenticationProvider} from "./modules/authentication-react";
 import { DefaultAuthenticationState} from "./modules/authentication-react";
+import ProfilesScreen from "./modules/screen-profiles";
 
 function useOpenUrlEvents() {
   const [latestOpenUrlEvent, setLatestOpenUrlEvent] =
@@ -274,12 +275,16 @@ function App() {
           <Route path="/whoami">
             <WhoamiScreen />
           </Route>
+          <Route exact path="/profiles">
+              <ProfilesScreen />
+          </Route>
         </Switch>
         <footer>
           <hr />
           <Link to="/">Home</Link>
           <Link to="/oidc-tester">OidcTester</Link>
           <Link to="/whoami">whoami</Link>
+          <Link to="/profiles">Profiles</Link>
         </footer>
       </HashRouter>
       </AuthenticationProvider>

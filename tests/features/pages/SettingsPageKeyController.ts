@@ -1,7 +1,6 @@
 import { assertTruthy } from "../../../packages/renderer/src/modules/assert";
-import type PlaywrightContext from "../contexts/PlaywrightContext";
-import type TestingLibraryContext from "../contexts/TestingLibraryContext";
-
+import type PlaywrightContext from "../../../packages/renderer/src/modules/davatar-cucumber-contexts/PlaywrightContext";
+import type TestingLibraryContext from "../../../packages/renderer/src/modules/davatar-cucumber-contexts/TestingLibraryContext";
 export default class SettingsPageKeyController {
   queries: TestingLibraryContext["queries"];
   constructor(
