@@ -9,6 +9,7 @@ import { assertTruthy } from '../../../packages/renderer/src/modules/assert';
 import type { Page } from 'playwright-core';
 import OidcTesterPageController from '../pages/OidcTesterPageController';
 import { base64url, calculateJwkThumbprint } from 'jose';
+import { parseIdTokenClaims } from '../../../packages/renderer/src/modules/openid-connect';
 const fetch = require('node-fetch').default;
 // import fetch from 'node-fetch';
 
@@ -150,9 +151,4 @@ function withAuthenticationRequest(urlIn: URL) {
     url.searchParams.set('type', 'AuthenticationRequest');
     url.searchParams.set('response_type', 'id_token');
     return url;
-}
-
-function parseIdTokenClaims(idToken: string) {
-    const idTokenClaims = JSON.parse((new TextDecoder).decode(base64url.decode(idToken.split('.')[1])));
-    return idTokenClaims;
 }

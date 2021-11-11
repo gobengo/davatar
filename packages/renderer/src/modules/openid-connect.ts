@@ -1,4 +1,5 @@
 import type { JWK } from "jose";
+import { base64url } from "jose";
 import { assertTruthy } from "./assert";
 
 export type ResponseType = 'id_token' | 'code' | 'token'
@@ -101,3 +102,54 @@ export class AuthenticationResponse implements AuthenticationResponse {
     );
   }
 }
+
+export function parseIdTokenClaims(idToken: string): Record<string, unknown> {
+  const idTokenClaims = JSON.parse((new TextDecoder).decode(base64url.decode(idToken.split('.')[1])));
+  return idTokenClaims;
+}
+
+export type StandardClaims =
+| "sub"
+| "name"
+| "given_name"
+| "family_name"
+| "middle_name"
+| "nickname"
+| "preferred_username"
+| "profile"
+| "picture"
+| "website"
+| "email"
+| "email_verified"
+| "gender"
+| "birthdate"
+| "zoneinfo"
+| "locale"
+| "phone_number"
+| "phone_number_verified"
+| "address"
+| "updated_at"
+;
+
+export const standardClaims: Array<StandardClaims> = [
+"sub",
+"name",
+"given_name",
+"family_name",
+"middle_name",
+"nickname",
+"preferred_username",
+"profile",
+"picture",
+"website",
+"email",
+"email_verified",
+"gender",
+"birthdate",
+"zoneinfo",
+"locale",
+"phone_number",
+"phone_number_verified",
+"address",
+"updated_at",
+];

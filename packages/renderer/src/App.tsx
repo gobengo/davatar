@@ -200,7 +200,7 @@ function App() {
     },
     [authenticationStorage],
   );
-  const initialAuthenticationState: IAuthenticationState|undefined = React.useMemo(
+  const initialAuthenticationState: IAuthenticationState|null = React.useMemo(
     () => {
       return storedAuthenticationState || DefaultAuthenticationState();
     },
