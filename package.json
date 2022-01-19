@@ -82,5 +82,10 @@
     "rollup-plugin-polyfill-node": "^0.7.0",
     "spectron": "^15.0.0",
     "tweetnacl": "^1.0.3"
-  }
+  },
+  "workspaces": [
+    "",
+    "packages/davatar-ui",
+    "packages/davatar-storybook"
+  ]
 }
