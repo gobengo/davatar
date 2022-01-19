@@ -8,6 +8,7 @@
       ]
     },
     "lib": ["ESNext", "dom", "dom.iterable"],
+    "jsx": "react",
   },
 
   "include": [
