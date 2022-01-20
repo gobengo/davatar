@@ -19,6 +19,6 @@
   },
   "include": ["./src"],
   "references": [
-    {"path": "../davatar-ui"}
+    {"path": "../davatar-ui/tsconfig.json"}
   ]
 }
