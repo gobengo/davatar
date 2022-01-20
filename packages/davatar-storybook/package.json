@@ -9,9 +9,10 @@
     "build-storybook": "build-storybook"
   },
   "dependencies": {
+    "davatar-ui": "file:../davatar-ui",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "davatar-ui": "0.0.0"
+    "y-webrtc": "^10.2.2"
   },
   "devDependencies": {
     "@babel/core": "^7.16.10",
@@ -19,8 +20,6 @@
     "@storybook/addon-essentials": "^6.5.0-alpha.21",
     "@storybook/addon-links": "^6.5.0-alpha.21",
     "@storybook/react": "^6.5.0-alpha.21",
-    "@types/react": "^17.0.33",
-    "@types/react-dom": "^17.0.10",
     "@vitejs/plugin-react": "^1.0.7",
     "babel-loader": "^8.2.3",
     "storybook-builder-vite": "^0.1.13",
