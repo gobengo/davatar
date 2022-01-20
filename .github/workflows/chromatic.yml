@@ -4,6 +4,10 @@ name: 'Chromatic Deployment'
 # Event for the workflow
 on: push
 
+defaults:
+  run:
+    working-directory: packages/davatar-storybook
+
 # List of jobs
 jobs:
   test:
@@ -20,3 +24,4 @@ jobs:
           #👇 Chromatic projectToken, see https://storybook.js.org/tutorials/intro-to-storybook/react/en/deploy/ to obtain it
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           token: ${{ secrets.GITHUB_TOKEN }}
+          workingDir: packages/davatar-storybook
