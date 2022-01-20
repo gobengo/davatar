@@ -2,21 +2,18 @@ import * as React from "react";
 import {Schema, DOMParser, DOMSerializer} from "prosemirror-model";
 import * as pmExampleSetup from "prosemirror-example-setup";
 // import 'prosemirror-view/style/prosemirror.css';
-import type * as Y from 'yjs';
+import * as Y from 'yjs';
 
 export type RichText = string;
 
 export const RichTextEditor = function (
     props: {
-        yDoc: Y.Doc
-        type: Y.XmlFragment
-        awareness: Awareness
+        yDoc?: Y.Doc
+        yType?: Y.XmlFragment
+        awareness?: Awareness
     }
 ) {
     return <>
-        <p>
-            I am RichTextEditor.
-        </p>
         <ProseMirrorEditor {...props} />
     </>;
 };
@@ -27,19 +24,26 @@ import type { EditorState } from "prosemirror-state";
 import { yCursorPlugin, ySyncPlugin, yUndoPlugin, undo, redo } from "y-prosemirror";
 import type { Awareness } from "y-protocols/awareness";
 import { keymap } from 'prosemirror-keymap';
+import { WebrtcProvider } from 'y-webrtc';
 
 function ProseMirrorEditor(
     props: {
-        yDoc: Y.Doc
-        awareness: Awareness
-        type: Y.XmlFragment
+        yDoc?: Y.Doc
+        awareness?: Awareness
+        yType?: Y.XmlFragment
     }
 ) {
+    const yDocRef = React.useRef(props.yDoc || new Y.Doc());
+    const yProviderAwareness: Awareness = React.useMemo<Awareness>(() => props.awareness || (() => {
+        // const provider = new WebsocketProvider('wss://demos.yjs.dev', 'bengo-foo', yDocRef.current);
+        const rtcProvider = new WebrtcProvider('bengo-example-document', yDocRef.current);
+        return rtcProvider.awareness;
+    })(), [yDocRef.current]);
     const [state, setState] = useProseMirror({
         schema,
         plugins: [
-            ySyncPlugin(props.type),
-            yCursorPlugin(props.awareness),
+            ySyncPlugin(props.yType || yDocRef.current.getXmlFragment('prosemirror')),
+            yCursorPlugin(yProviderAwareness),
             yUndoPlugin(),
             keymap({
               'Mod-z': undo,
@@ -54,7 +58,7 @@ function ProseMirrorEditor(
     }
     return <>
         <div style={{whiteSpace: 'pre-wrap'}}>
-            <ProseMirror state={state} onChange={setState} />
+            <ProseMirror state={state} onChange={onProseMirrorChange} />
         </div>
     </>;
 };
