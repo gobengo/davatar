@@ -3,7 +3,8 @@ import React from 'react';
 import { Button } from './Button';
 import './header.css';
 
-interface HeaderProps {
+export interface HeaderProps {
+  // eslint-disable-next-line @typescript-eslint/ban-types
   user?: {};
   onLogin: () => void;
   onLogout: () => void;

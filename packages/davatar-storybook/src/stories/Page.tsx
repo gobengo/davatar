@@ -3,8 +3,11 @@ import React from 'react';
 import { Header } from './Header';
 import './page.css';
 
-interface PageProps {
-  user?: {};
+// eslint-disable-next-line @typescript-eslint/ban-types
+type User = {};
+
+export interface PageProps {
+  user?: User;
   onLogin: () => void;
   onLogout: () => void;
   onCreateAccount: () => void;

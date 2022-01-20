@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { NodeSpec, MarkSpec } from 'prosemirror-model';
 import { Schema } from 'prosemirror-model';
 
