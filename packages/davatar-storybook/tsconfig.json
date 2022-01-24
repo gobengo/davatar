@@ -1,0 +1,36 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "target": "ESNext",
+    "useDefineForClassFields": true,
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "allowJs": false,
+    "skipLibCheck": false,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "react",
+    "typeRoots": [
+      "./types",
+      "./node_modules/@types",
+    ],
+    "paths": {
+      "/@/*": [
+        "./src/*"
+      ],
+      "react-router": ["./types/react-router"]
+    },
+  },
+  "include": [
+    "./src",
+    "types/**/*.d.ts",
+  ],
+  "references": [
+    {"path": "../davatar-ui/tsconfig.json"}
+  ]
+}

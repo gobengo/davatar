@@ -1,13 +1,17 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
+    "target": "ES5",
+    "composite": true,
     "baseUrl": ".",
+    "outDir": "out-tsc",
     "paths": {
       "/@/*": [
         "./src/*"
       ]
     },
     "lib": ["ESNext", "dom", "dom.iterable"],
+    "jsx": "react",
   },
 
   "include": [
@@ -15,6 +19,5 @@
     "src/**/*.ts",
     "src/**/*.tsx",
     "types/**/*.d.ts",
-    "../preload/types/electron-api.d.ts"
   ]
 }

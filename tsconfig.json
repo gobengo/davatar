@@ -2,6 +2,7 @@
   "compilerOptions": {
     "allowJs": false,
     "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
     "module": "esnext",
     "target": "esnext",
     "sourceMap": true,
@@ -13,10 +14,12 @@
     "types": [
       "node"
     ],
-    "typeRoots": [
-      "node_modules/@types",
-    ],
+    "typeRoots": [],
     "lib": ["ESNext"],
     "jsx": "react-jsx"
   },
+  "references": [
+    { "path": "packages/davatar-ui" },
+    { "path": "packages/davatar-storybook" }
+  ]
 }

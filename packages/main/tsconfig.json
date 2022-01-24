@@ -7,11 +7,12 @@
         "./src/*"
       ]
     },
+    "types": [
+      "vite/client"
+    ]
   },
   "files": [
     "src/index.ts"
   ],
-  "include": [
-    "../../types/**/*.d.ts"
-  ]
+  "include": []
 }

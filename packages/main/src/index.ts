@@ -66,9 +66,9 @@ const createWindow = async () => {
    * `file://../renderer/index.html` for production and test
    */
   const pageUrl =
-    import.meta.env.MODE === "development" &&
-    import.meta.env.VITE_DEV_SERVER_URL !== undefined
-      ? import.meta.env.VITE_DEV_SERVER_URL
+    (import.meta.env.MODE === "development" &&
+    import.meta.env.VITE_DEV_SERVER_URL !== undefined)
+      ? String(import.meta.env.VITE_DEV_SERVER_URL)
       : new URL(
           "../renderer/dist/index.html",
           "file://" + __dirname,

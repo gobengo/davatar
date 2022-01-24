@@ -1,0 +1,1 @@
+../../../types/prosemirror-example-setup.d.ts
