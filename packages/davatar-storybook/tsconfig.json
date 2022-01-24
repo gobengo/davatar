@@ -14,10 +14,22 @@
     "moduleResolution": "Node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "typeRoots": [
+      "./types",
+      "./node_modules/@types",
+    ],
+    "paths": {
+      "/@/*": [
+        "./src/*"
+      ],
+      "react-router": ["./types/react-router"]
+    },
   },
-  "include": ["./src"],
+  "include": [
+    "./src",
+    "types/**/*.d.ts",
+  ],
   "references": [
     {"path": "../davatar-ui/tsconfig.json"}
   ]
