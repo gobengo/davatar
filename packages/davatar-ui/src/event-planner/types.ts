@@ -1,4 +1,5 @@
 export interface PlannableEvent {
+    id: string;
     name: string;
     description: string;
     registration?: {

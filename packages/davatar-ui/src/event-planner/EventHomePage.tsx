@@ -1,8 +1,15 @@
 import * as React from "react";
+import type { EventAdder } from "./EventPlanner";
 import type { PlannableEvent } from "./types";
 
 // eslint-disable-next-line @typescript-eslint/ban-types
-export const EventHomePage = function ({ event }: { event: PlannableEvent }) {
+export const EventHomePage = function ({
+  event,
+  addEvent,
+}: {
+  event: PlannableEvent;
+  addEvent?: EventAdder;
+}) {
   return (
     <>
       <header>
@@ -43,10 +50,15 @@ export const EventHomePage = function ({ event }: { event: PlannableEvent }) {
 
       {event.subEvents.length && (
         <>
-          <h2>Events</h2>
+          <header>
+            <h2>Events</h2>
+            {addEvent && <>
+              <button onClick={addEvent}>+</button>
+            </>}
+          </header>
           <ul>
             {event.subEvents.map((subEvent) => (
-              <li key={subEvent.name}>
+              <li key={subEvent.id}>
                 <EventTimelineItem event={subEvent}></EventTimelineItem>
               </li>
             ))}
@@ -67,7 +79,9 @@ function EventTimelineItem({ event }: { event: PlannableEvent }) {
   }, [event]);
   return (
     <>
-      <p>{formattedBeginning} - {formattedEnd}</p>
+      <p>
+        {formattedBeginning} - {formattedEnd}
+      </p>
       <header>
         <strong>{event.name}</strong>
       </header>
