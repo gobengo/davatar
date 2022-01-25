@@ -1,6 +1,9 @@
 import React from "react";
 import type { ComponentStory, ComponentMeta } from "@storybook/react";
 import { Scribe } from "davatar-ui";
+import styled from 'styled-components';
+
+const sampleRoom = 'davatar-storybook-scribe-room-0';
 
 const defaultProps: Parameters<typeof Scribe>[0] = {};
 
@@ -16,26 +19,53 @@ export const DefaultProps: ComponentStory<typeof Scribe> = (
   args
 ) => <Scribe {...args} />;
 
-export const MultipleEditors: ComponentStory<typeof Scribe> = (
+const MultipleEditorsContainer = styled('div')`
+  display: flex;
+`;
+
+const MultipleEditorsItem = styled('div')`
+  flex-grow: 1;
+`;
+
+export const MultipleEditorsSameRoom: ComponentStory<typeof Scribe> = (
   args
 ) => {
-  const [room, setRoom] = React.useState<string>("davatar-storybook-scribe-multipleeditors");
   return (
     <>
-      <dl>
-        <dt>Editor 1</dt>
-        <dd>
+      <MultipleEditorsContainer>
+        <MultipleEditorsItem>
+          <h1>Scribe A</h1>
           <Scribe
-            room={room}
-          />
-        </dd>
-        <dt>Editor 2</dt>
-        <dd>
+              initialRoom={sampleRoom}
+            />
+        </MultipleEditorsItem>
+        <MultipleEditorsItem>
+          <h1>Scribe B</h1>
           <Scribe
-            room={room}
-          />
-        </dd>
-      </dl>
+              initialRoom={sampleRoom}
+            />
+        </MultipleEditorsItem>
+      </MultipleEditorsContainer>
+    </>
+  );
+};
+
+export const Multiple: ComponentStory<typeof Scribe> = (
+  args
+) => {
+  return (
+    <>
+      <MultipleEditorsContainer>
+        <MultipleEditorsItem>
+          <h1>Scribe A</h1>
+          <Scribe
+            initialRoom={sampleRoom} />
+        </MultipleEditorsItem>
+        <MultipleEditorsItem>
+          <h1>Scribe B</h1>
+          <Scribe />
+        </MultipleEditorsItem>
+      </MultipleEditorsContainer>
     </>
   );
 };

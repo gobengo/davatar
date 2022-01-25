@@ -13,9 +13,11 @@
     "tsc": "tsc --build"
   },
   "dependencies": {
+    "@material-ui/core": "^4.12.3",
     "davatar-ui": "file:../davatar-ui",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
+    "styled-components": "^5.3.3",
     "y-webrtc": "^10.2.2"
   },
   "devDependencies": {
@@ -24,6 +26,7 @@
     "@storybook/addon-essentials": "^6.5.0-alpha.21",
     "@storybook/addon-links": "^6.5.0-alpha.21",
     "@storybook/react": "^6.5.0-alpha.21",
+    "@types/styled-components": "^5.1.21",
     "@vitejs/plugin-react": "^1.0.7",
     "babel-loader": "^8.2.3",
     "chromatic": "^6.4.1",
