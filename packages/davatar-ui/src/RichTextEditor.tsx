@@ -34,16 +34,17 @@ function ProseMirrorEditor(
     }
 ) {
     const yDocRef = React.useRef(props.yDoc || new Y.Doc());
-    const yProviderAwareness: Awareness = React.useMemo<Awareness>(() => props.awareness || (() => {
-        // const provider = new WebsocketProvider('wss://demos.yjs.dev', 'bengo-foo', yDocRef.current);
-        const rtcProvider = new WebrtcProvider('bengo-example-document', yDocRef.current);
-        return rtcProvider.awareness;
-    })(), [yDocRef.current]);
+    const yProviderAwareness: Awareness|undefined = React.useMemo<Awareness|undefined>(() => props.awareness || (() => {
+        if (props.awareness) {
+            return props.awareness;
+        }
+        return;
+    })(), [props.awareness, yDocRef.current]);
     const [state, setState] = useProseMirror({
         schema,
         plugins: [
             ySyncPlugin(props.yType || yDocRef.current.getXmlFragment('prosemirror')),
-            yCursorPlugin(yProviderAwareness),
+            ...(yProviderAwareness ? [yCursorPlugin(yProviderAwareness)] : []),
             yUndoPlugin(),
             keymap({
               'Mod-z': undo,
