@@ -1,26 +1,22 @@
 import { EditorState } from "prosemirror-state";
 import * as React from "react";
-import { DOMParser, DOMSerializer} from "prosemirror-model";
-import * as pmExampleSetup from "prosemirror-example-setup";
-// import 'prosemirror-view/style/prosemirror.css';
-import * as Y from 'yjs';
 import { EditorView } from 'prosemirror-view';
 import type { Node as ProsemirrorNode ,Schema} from "prosemirror-model";
-import type { Plugin } from 'prosemirror-state';
+import type { Plugin , Transaction } from 'prosemirror-state';
 
-export const ProsemirrorEditor = function (props: {
+export const ProsemirrorEditor = function <N extends string, M extends string>(props: {
     state: EditorState
+    dispatchTransaction(tr: Transaction<Schema<N,M>>): void
 }) {
+    console.log('ProsemirrorEditor render', props);
+    const { state } = props;
     const view = React.useMemo(
         () => {
             const view = new EditorView(undefined, {
                 state: props.state,
                 dispatchTransaction(tr) {
-                    console.log('CustomEditorProvider dispatchTransaction', tr);
-                    // const newState = editorState.apply(tr);
-                    // setEditorState(newState);
-                    // pmDocView.updateState(newState);
-                    // setEditorState(newState);
+                    view.update({ state: view.state.apply(tr) });
+                    props.dispatchTransaction(tr);
                 },
             });
             return view;
@@ -40,8 +36,10 @@ export const ProsemirrorEditor = function (props: {
         [view]
     );
     return <>
-        <h1>Prosemirror Editor</h1>
-        return <div ref={editorRef} className="prosemirror-editor" />;
+        <div ref={editorRef} className="prosemirror-editor"
+            style={{
+                whiteSpace: 'pre-wrap',
+            }} />
     </>;
 };
 
@@ -70,7 +68,7 @@ export function CustomEditorProvider<A extends string,B extends string>(props: {
                     console.log('CustomEditorProvider dispatchTransaction', tr);
                     const newState = editorState.apply(tr);
                     // setEditorState(newState);
-                    // pmDocView.updateState(newState);
+                    pmDocView.updateState(newState);
                     // setEditorState(newState);
                 },
             });

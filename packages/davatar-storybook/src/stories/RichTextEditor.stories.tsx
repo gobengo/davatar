@@ -11,17 +11,17 @@ const pmXmlFragment = yDoc.getXmlFragment("prosemirror");
 console.log(
   "creating provider davatar-storybook-RichTextEditor-stories-default-webrtc"
 );
-const rtcProvider = new WebrtcProvider(
-  "davatar-storybook-RichTextEditor-stories-default-webrtc",
-  yDoc
-);
+// const rtcProvider = new WebrtcProvider(
+//   "davatar-storybook-RichTextEditor-stories-default-webrtc",
+//   yDoc
+// );
 import { RichTextEditor } from "davatar-ui";
 import { schema } from "davatar-ui/src/ySchema";
 
-const explicitYjsProps: Parameters<typeof RichTextEditor>[0] = {
-  awareness: rtcProvider.awareness,
-  yDoc,
-};
+// const explicitYjsProps: Parameters<typeof RichTextEditor>[0] = {
+//   awareness: rtcProvider.awareness,
+//   yDoc,
+// };
 
 const defaultProps: Parameters<typeof RichTextEditor>[0] = {};
 
@@ -88,9 +88,9 @@ export const MultipleEditors: ComponentStory<typeof RichTextEditor> = (
   );
 };
 
-export const ExplicitYjsProps: ComponentStory<typeof RichTextEditor> = (
-  args
-) => <RichTextEditor {...explicitYjsProps} {...args} />;
+// export const ExplicitYjsProps: ComponentStory<typeof RichTextEditor> = (
+//   args
+// ) => <RichTextEditor {...explicitYjsProps} {...args} />;
 
 export const DefaultProps: ComponentStory<typeof RichTextEditor> = (args) => (
   <RichTextEditor {...args} />
