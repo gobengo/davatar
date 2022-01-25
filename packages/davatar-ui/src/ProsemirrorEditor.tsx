@@ -96,6 +96,10 @@ export const CustomEditor = function<A extends string,B extends string>(props: {
     const editorRef = React.useCallback(
         (element: HTMLDivElement | null) => {
         if (element && view) {
+            // first clear all other children
+            while (element.lastChild) {
+                element.removeChild(element.lastChild);
+            }
             element.appendChild(view.dom);
         }
         },

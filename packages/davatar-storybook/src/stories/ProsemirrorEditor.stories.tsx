@@ -7,6 +7,7 @@ import type { Schema } from 'prosemirror-model';
 import { prosemirrorToYDoc } from 'y-prosemirror';
 import { DOMParser } from "prosemirror-model";
 import * as Y from 'yjs';
+import { WebrtcProvider } from "y-webrtc";
 
 const defaultProps: Parameters<typeof ProsemirrorEditor>[0] = {
   state: EditorState.create({ schema }),
@@ -113,5 +114,43 @@ export const YjsDocStateSwitcher: ComponentStory<typeof ProsemirrorEditor> = (
       {JSON.stringify(chosenYjsDoc)}
     </p>
     <ProsemirrorYjsEditor yjsDoc={chosenYjsDoc}></ProsemirrorYjsEditor>
+  </>;
+};
+
+export const MultiRoomCollaboration: ComponentStory<typeof ProsemirrorEditor> = (
+  args
+) => {
+  const [choices] = React.useState(SampleYjsDocChoices);
+  const [choiceIndex, setChoiceIndex] = React.useState(0);
+  const choice = React.useMemo(
+    () => choices[choiceIndex],
+    [choices, choiceIndex],
+  );
+  React.useEffect(
+    () => {
+      const roomName = 'FHsTyFHNmvNpw4o7+rp+M1yqMyBF8vXSBRkZtkQ0RKY';
+      const collaborationProvider = new WebrtcProvider(roomName, choice, );
+      return () => {
+        collaborationProvider.destroy();
+      };
+    },
+    [choice],
+  );
+  return <>
+    <h1>ProsemirrorEditor w/ switchable EditorState choices</h1>
+    <ul>
+    {choices.map(
+      (option, index) => <li key={index}>
+        <span onClick={() => setChoiceIndex(index)}>
+          Document {index}
+        </span>
+      </li>
+    )}
+    </ul>
+    <h2>Collaboratively Edit Choice {choiceIndex}</h2>
+    <p>
+      {JSON.stringify(choice)}
+    </p>
+    <ProsemirrorYjsEditor yjsDoc={choice}></ProsemirrorYjsEditor>
   </>;
 };
