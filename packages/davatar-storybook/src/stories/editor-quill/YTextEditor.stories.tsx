@@ -27,9 +27,9 @@ export const Collaboration: ComponentStory<typeof YTextEditor> = (args) => {
     return <>
         <div style={{display: 'flex'}}>
     {new Array(numPeers).fill(0).map((e,index) => <>
-            <li key={index}>
+            <div key={index} style={{flexGrow: 1}}>
                 <YTextEditor {...args} />
-            </li>
+            </div>
     </>)}
         </div>
     </>;
