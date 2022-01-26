@@ -1,76 +1,79 @@
 import React from "react";
 import type { ComponentStory, ComponentMeta } from "@storybook/react";
-import type { AddressLocation, PlannableEvent  } from "davatar-ui";
-import { EventPlanner  } from "davatar-ui";
+import type { AddressLocation, JSONDatetime, PlannableEvent } from "davatar-ui";
+import { EventPlanner } from "davatar-ui";
+import type { Y } from "@syncedstore/core";
+import { syncedStore, getYjsValue } from "@syncedstore/core";
+import { useSyncedStore } from "@syncedstore/react";
+
+import { WebrtcProvider } from "y-webrtc";
 
 function createIdString(): string {
-    return Math.random().toString().slice(2);
+  return Math.random().toString().slice(2);
 }
 
 function ComputerHistoryMuseumLocation(): AddressLocation {
-    return {
-        name: 'Computer History Museum',
-        address: '1401 N Shoreline Blvd',
-        city: 'Mountain View, CA',
-        zip: '94043',
-    };
+  return {
+    name: "Computer History Museum",
+    address: "1401 N Shoreline Blvd",
+    city: "Mountain View, CA",
+    zip: "94043",
+  };
 }
 
 function IIWOrganizers() {
-    return [
-        { name: `Phil Windley` },
-        { name: `Kaliya Young`},
-        { name: `Doc Searls` },
-    ];
+  return [
+    { name: `Phil Windley` },
+    { name: `Kaliya Young` },
+    { name: `Doc Searls` },
+  ];
 }
 
 function IIW34Keynote(): PlannableEvent {
-    return {
-        id: createIdString(),
-        name: 'IIW34 Keynote',
-        description: 'Welcome ceremony',
-        beginning: new Date(Date.parse('2022-04-26T15:00:00.000Z')),
-        end: new Date(Date.parse('2022-04-26T16:00:00.000Z')),
-        location: ComputerHistoryMuseumLocation(),
-        organizers: IIWOrganizers(),
-        subEvents: [],
-    };
+  return {
+    id: createIdString(),
+    name: "IIW34 Keynote",
+    description: "Welcome ceremony",
+    beginning: { iso8601: "2022-04-26T15:00:00.000Z" },
+    end: { iso8601: "2022-04-26T16:00:00.000Z" },
+    location: ComputerHistoryMuseumLocation(),
+    organizers: IIWOrganizers(),
+    subEvents: [],
+  };
 }
 
 function IIW34ClosingCeremony(): PlannableEvent {
-    return {
-        id: createIdString(),
-        name: 'IIW34 Closing Ceremony',
-        description: 'Closing ceremony',
-        beginning: new Date(Date.parse('2022-04-28T22:00:00.000Z')),
-        end: new Date(Date.parse('2022-04-28T23:00:00.000Z')),
-        location: ComputerHistoryMuseumLocation(),
-        organizers: IIWOrganizers(),
-        subEvents: [],
-    };
+  return {
+    id: createIdString(),
+    name: "IIW34 Closing Ceremony",
+    description: "Closing ceremony",
+    beginning: { iso8601: "2022-04-28T22:00:00.000Z" },
+    end: { iso8601: "2022-04-28T23:00:00.000Z" },
+    location: ComputerHistoryMuseumLocation(),
+    organizers: IIWOrganizers(),
+    subEvents: [],
+  };
 }
 
 function IIW34(): PlannableEvent {
-    return {
-        id: createIdString(),
-        name: 'Internet Identity Workshop XXXIV (#34) 2022A',
-        description: 'The Internet Identity Workshop #IIW has been finding, probing and solving identity issues twice every year since 2005.',
-        registration: {
-            url: 'https://www.eventbrite.com/e/internet-identity-workshop-iiwxxxiv-34-2022a-tickets-220922293527',
-        },
-        beginning: new Date(Date.parse('2022-04-26T15:00:00.000Z')),
-        end: new Date(Date.parse('2022-04-28T23:00:00.000Z')),
-        location: ComputerHistoryMuseumLocation(),
-        organizers: IIWOrganizers(),
-        subEvents: [
-            IIW34Keynote(),
-            IIW34ClosingCeremony(),
-        ],
-    };
+  return {
+    id: createIdString(),
+    name: "Internet Identity Workshop XXXIV (#34) 2022A",
+    description:
+      "The Internet Identity Workshop #IIW has been finding, probing and solving identity issues twice every year since 2005.",
+    registration: {
+      url: "https://www.eventbrite.com/e/internet-identity-workshop-iiwxxxiv-34-2022a-tickets-220922293527",
+    },
+    beginning: { iso8601: "2022-04-26T15:00:00.000Z" },
+    end: { iso8601: "2022-04-28T23:00:00.000Z" },
+    location: ComputerHistoryMuseumLocation(),
+    organizers: IIWOrganizers(),
+    subEvents: [IIW34Keynote(), IIW34ClosingCeremony()],
+  };
 }
 
 const defaultProps: Parameters<typeof EventPlanner>[0] = {
-    event: IIW34(),
+  event: IIW34(),
 };
 
 export default {
@@ -81,92 +84,144 @@ export default {
   },
 } as ComponentMeta<typeof EventPlanner>;
 
-export const DefaultProps: ComponentStory<typeof EventPlanner> = (
-  args
-) => {
+export const DefaultProps: ComponentStory<typeof EventPlanner> = (args) => {
   return <EventPlanner {...args} />;
 };
 
 type MutableEventState = {
-    event: PlannableEvent
-}
+  event: PlannableEvent;
+};
 
-function MutableEventStateInit(createInitialEvent: () => PlannableEvent): MutableEventState {
-    return {
-        event: createInitialEvent(),
-    };
+function MutableEventStateInit(
+  createInitialEvent: () => PlannableEvent
+): MutableEventState {
+  return {
+    event: createInitialEvent(),
+  };
 }
 
 enum MutableEventActionType {
-    addEvent = 'addEvent',
+  addEvent = "addEvent",
 }
 
-type Action =
-{ type: MutableEventActionType.addEvent }
-;
-
-export const Mutable: ComponentStory<typeof EventPlanner> = (
-    args
-  ) => {
-      const [state, dispatch] = React.useReducer(
-          (state: MutableEventState, action: Action): MutableEventState => {
-              console.log('Mutable reducing', { state, action });
-              switch (action.type) {
-                  case MutableEventActionType.addEvent:
-                      // eslint-disable-next-line no-case-declarations
-                      const newEvent = IIW34ClosingCeremony();
-                      return {
-                          ...state,
-                          event: {
-                              ...state.event,
-                              subEvents: [
-                                  ...state.event.subEvents,
-                                  newEvent,
-                              ],
-                          },
-                      };
-                    //   state.event.subEvents.push(newEvent);
-                      break;
-                    default:
-                        // eslint-disable-next-line no-case-declarations
-                        const x: never = action.type;
-              }
-              return state;
+function MutableEventReducer(state: MutableEventState, action: Action): MutableEventState {
+    console.log("Mutable reducing", { state, action });
+    switch (action.type) {
+      case MutableEventActionType.addEvent:
+        // eslint-disable-next-line no-case-declarations
+        const newEvent = IIW34ClosingCeremony();
+        return {
+          ...state,
+          event: {
+            ...state.event,
+            subEvents: [...state.event.subEvents, newEvent],
           },
-          IIW34,
-          MutableEventStateInit,
-      );
-    const addEvent = React.useCallback(
-        () => {
-            dispatch({
-                type: MutableEventActionType.addEvent,
-            });
-        },
-        [dispatch]
-    );
-    return <EventPlanner event={state.event} addEvent={addEvent} />;
-  };
+        };
+        //   state.event.subEvents.push(newEvent);
+        break;
+      default:
+        // eslint-disable-next-line no-case-declarations
+        const x: never = action.type;
+    }
+    return state;
+}
 
-export const Collaboration: ComponentStory<typeof EventPlanner> = (
-    args
-  ) => {
-    const numPeers = 2;
-    const peers = React.useMemo(() => {
-        return new Array(numPeers).fill(0).map((e,i) => ({
-            name: i,
-            event: IIW34(),
-        }));
-    }, [numPeers]);
-    return <>
-        <div style={{display: 'flex'}}>
-            {peers.map((peer) => {
-                return <div key={peer.name} style={{flexGrow: 1}}>
-                    <EventPlanner
-                        event={peer.event}
-                    />
-                </div>;
-            })}
-        </div>
-    </>;
-  };
-  
+type Action = { type: MutableEventActionType.addEvent };
+
+export const Mutable: ComponentStory<typeof EventPlanner> = (args) => {
+  const [state, dispatch] = React.useReducer(
+    MutableEventReducer,
+    IIW34,
+    MutableEventStateInit
+  );
+  const addEvent = React.useCallback(() => {
+    dispatch({
+      type: MutableEventActionType.addEvent,
+    });
+  }, [dispatch]);
+  return <EventPlanner event={state.event} addEvent={addEvent} />;
+};
+
+const collaborationStore = syncedStore({
+  event: {} as PlannableEvent,
+});
+const doc = getYjsValue(collaborationStore);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// const webrtcProvider = new WebrtcProvider("davatar-storybook-event-planner-collaboration", doc as any);
+
+function createJSONDatetime(date: Date): JSONDatetime {
+    return { iso8601: date.toISOString() };
+}
+
+function makeValidEvent(input: Partial<PlannableEvent>): PlannableEvent {
+  if (!input.id) {
+    input.id = createIdString();
+  }
+  if (!input.name) {
+    input.name = `Event id=${input.id}`;
+  }
+  if (!input.organizers) {
+    input.organizers = [];
+  }
+  if (!input.beginning) {
+    input.beginning = createJSONDatetime(new Date());
+  }
+  if (!input.end) {
+    input.end = createJSONDatetime(new Date());
+  }
+  if (!input.location) {
+      input.location = ComputerHistoryMuseumLocation();
+  }
+  if ( ! input.subEvents) {
+      input.subEvents = [];
+  }
+  return input as PlannableEvent;
+}
+
+export const Collaboration: ComponentStory<typeof EventPlanner> = (args) => {
+  const numPeers = 2;
+  React.useEffect(
+    () => {
+        const yjsDoc = getYjsValue(collaborationStore);
+        if ( ! yjsDoc) {
+            throw new Error('failed to getYjsValue from syncedStore');
+        }
+        console.log('Collaboration yjsDoc', yjsDoc);
+        const provider = new WebrtcProvider(
+            'davatar-storybook-event-planner-collaboration',
+            yjsDoc as Y.Doc,
+        );
+        return () => {
+            return provider.destroy();
+        };
+    },
+    [collaborationStore],
+  );
+  const state = useSyncedStore(collaborationStore);
+  const event = React.useMemo(
+      () => makeValidEvent(state.event),
+      [state.event],
+  );
+  const [collaborationProvider, setCollaborationProvider] = React.useState(null);
+  const addEvent = React.useCallback(
+      () => {
+          console.log('Collaboration addEvent', event.subEvents);
+          event.subEvents.push(IIW34ClosingCeremony());
+      },
+      [event],
+  );
+  console.log('collaborationStore.event', JSON.stringify(collaborationStore.event));
+  return (
+    <>
+      <div style={{ display: "flex" }}>
+        {new Array(numPeers).fill(0).map((e, index) => {
+          return (
+            <div key={index} style={{ flexGrow: 1 }}>
+              <EventPlanner event={event} addEvent={addEvent} />
+            </div>
+          );
+        })}
+      </div>
+    </>
+  );
+};

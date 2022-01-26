@@ -1,3 +1,6 @@
+export type JSONDatetime = {
+    iso8601: string;
+}
 export interface PlannableEvent {
     id: string;
     name: string;
@@ -5,8 +8,8 @@ export interface PlannableEvent {
     registration?: {
         url: string;
     },
-    beginning: Date,
-    end: Date,
+    beginning: JSONDatetime,
+    end: JSONDatetime,
     location: AddressLocation,
     organizers: Array<{ name: string }>,
     subEvents: PlannableEvent[],

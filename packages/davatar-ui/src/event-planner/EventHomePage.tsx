@@ -1,6 +1,6 @@
 import * as React from "react";
 import type { EventAdder } from "./EventPlanner";
-import type { PlannableEvent } from "./types";
+import type { JSONDatetime, PlannableEvent } from "./types";
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 export const EventHomePage = function ({
@@ -10,6 +10,12 @@ export const EventHomePage = function ({
   event: PlannableEvent;
   addEvent?: EventAdder;
 }) {
+  // const formattedBeginning = React.useMemo(() => {
+  //   return formatEventTime(parseJSONDatetime(event.beginning));
+  // }, [event]);
+  // const formattedEnd = React.useMemo(() => {
+  //   return formatEventTime(parseJSONDatetime(event.end));
+  // }, [event]);
   return (
     <>
       <header>
@@ -23,17 +29,15 @@ export const EventHomePage = function ({
       <p>{event.description}</p>
       <>
         <h2>Date and time</h2>
-        <div className="event-details__data">
+        {/* <div className="event-details__data">
           <time data-automation="event-details-time">
             <span className="js-date-time-first-line">
-              {event.beginning.toLocaleString()} –
+              {formattedBeginning} –
             </span>
             <br />
-            <span className="js-date-time-second-line">
-              {event.end.toLocaleString()}
-            </span>
+            <span className="js-date-time-second-line">{formattedEnd}</span>
           </time>
-        </div>
+        </div> */}
       </>
       <>
         <h2>Location</h2>
@@ -48,13 +52,15 @@ export const EventHomePage = function ({
         </div>
       </>
 
-      {event.subEvents.length && (
+      {(event.subEvents.length || addEvent) && (
         <>
           <header>
             <h2>Events</h2>
-            {addEvent && <>
-              <button onClick={addEvent}>+</button>
-            </>}
+            {addEvent && (
+              <>
+                <button onClick={addEvent}>+</button>
+              </>
+            )}
           </header>
           <ul>
             {event.subEvents.map((subEvent) => (
@@ -70,13 +76,17 @@ export const EventHomePage = function ({
   );
 };
 
+function parseJSONDatetime(input: JSONDatetime): Date {
+  return new Date(Date.parse(input.iso8601));
+}
+
 function EventTimelineItem({ event }: { event: PlannableEvent }) {
   const formattedBeginning = React.useMemo(() => {
-    return formatEventTime(event.beginning);
-  }, [event]);
+    return formatEventTime(parseJSONDatetime(event.beginning));
+  }, [event.beginning]);
   const formattedEnd = React.useMemo(() => {
-    return formatEventTime(event.end);
-  }, [event]);
+    return formatEventTime(parseJSONDatetime(event.end));
+  }, [event.end]);
   return (
     <>
       <p>
