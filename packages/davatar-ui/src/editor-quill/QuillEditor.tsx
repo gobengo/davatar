@@ -2,8 +2,13 @@ import * as React from "react";
 import Quill from 'quill';
 import QuillCursors from 'quill-cursors';
 import 'quill/dist/quill.snow.css';
+import styled from "styled-components";
 
 Quill.register('modules/cursors', QuillCursors);
+
+const QuillContainer = styled('div')`
+height: inherit;
+`;
 
 export function QuillEditor(props: {
     placeholder: string,
@@ -43,6 +48,6 @@ export function QuillEditor(props: {
         [quill],
     );
     return <>
-        <div ref={editorElRef}></div>
+        <QuillContainer ref={editorElRef}></QuillContainer>
     </>;
 }

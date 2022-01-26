@@ -7,21 +7,18 @@ export type { PlannableEvent } from "./types";
 export type EventAdder = () => void;
 
 // eslint-disable-next-line @typescript-eslint/ban-types
-export const EventPlanner = function ({
-  event,
-  addEvent,
-  descriptionYjsDoc,
-}: {
+export const EventPlanner = function (props: {
   event: PlannableEvent;
   addEvent?: EventAdder;
-  descriptionYjsDoc?: Y.Doc;
+  yjsDocs?: {
+    name?: Y.Text,
+    description?: Y.Text,
+  }
 }) {
   return (
     <>
       <EventHomePage
-        event={event}
-        addEvent={addEvent}
-        descriptionYjsDoc={descriptionYjsDoc}
+        {...props}
         />
     </>
   );
