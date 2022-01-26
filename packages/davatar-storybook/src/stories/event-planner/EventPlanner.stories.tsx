@@ -250,6 +250,7 @@ const singleEventStore = syncedStore({
 });
 
 class YjsPlannableEvent implements PlannableEvent {
+  rootDoc: Y.Doc;
   docs: {
     beginning: Y.Map<unknown>;
     end: Y.Map<unknown>;
@@ -267,6 +268,7 @@ class YjsPlannableEvent implements PlannableEvent {
   };
   constructor(options: { yjsDoc: Y.Doc }) {
     const { yjsDoc } = options;
+    this.rootDoc = yjsDoc;
     const end = yjsDoc.getMap("end");
     const beginning = yjsDoc.getMap("beginning");
     const location = options.yjsDoc.getMap("location");
@@ -278,8 +280,8 @@ class YjsPlannableEvent implements PlannableEvent {
     location.set("city", locationCity);
     const locationZip = new Y.Text();
     location.set("zip", locationZip);
-    const organizers = new Y.Array<Y.Doc>();
-    const subEvents = new Y.Array<Y.Doc>();
+    const organizers = yjsDoc.getArray<Y.Doc>('organizers');
+    const subEvents = yjsDoc.getArray<Y.Doc>('subEvents');
     this.docs = {
       id: yjsDoc.getText("id"),
       name: yjsDoc.getText("name"),
@@ -295,6 +297,24 @@ class YjsPlannableEvent implements PlannableEvent {
       organizers,
       subEvents,
     };
+  }
+  addEvent = () => {
+    const newEvent: PlannableEvent = {
+      beginning: { iso8601: (new Date).toISOString() },
+      description: '',
+      end: { iso8601: (new Date).toISOString(), },
+      id: createIdString(),
+      location: ComputerHistoryMuseumLocation(),
+      name: 'New subEvent',
+      organizers: [],
+      subEvents: [],
+    };
+    const newEventRootYjsDoc = new Y.Doc;
+    const newEventYjsEvent = new YjsPlannableEvent({ yjsDoc: newEventRootYjsDoc });
+    newEventYjsEvent.docs.id.insert(0, newEvent.id);
+    newEventYjsEvent.docs.description.insert(0, newEvent.description);
+    newEventYjsEvent.docs.name.insert(0, newEvent.name);
+    this.docs.subEvents.insert(this.docs.subEvents.length-1, [newEventRootYjsDoc]);
   }
   get description() {
     const yText = this.docs.name;
@@ -367,7 +387,7 @@ const StyleFix = styled("div")`
 }
 `;
 
-export const EditingEventDescription: ComponentStory<typeof EventPlanner> = (
+export const EditingEvent: ComponentStory<typeof EventPlanner> = (
   args
 ) => {
   const numPeers = 2;
@@ -393,6 +413,7 @@ export const EditingEventDescription: ComponentStory<typeof EventPlanner> = (
     });
     return event;
   }, [state]);
+  const forceUpdate: () => void = React.useState({})[1].bind(null, {});
   return (
     <StyleFix>
       <div style={{ display: "flex" }}>
@@ -416,7 +437,7 @@ export const EditingEventDescription: ComponentStory<typeof EventPlanner> = (
                     <YTextEditor text={state.description} />
                   </dd>
               </dl> */}
-              <EventHomePage event={event} yjsDocs={event.docs} />
+              <EventHomePage event={event} yjsDocs={event.docs} addEvent={() => { event.addEvent(); forceUpdate(); }} />
             </div>
           );
         })}

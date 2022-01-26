@@ -19,7 +19,6 @@ export function QuillEditor(props: {
     const [quill, setQuill] = React.useState<null|Quill>(null);
     React.useEffect(
         () => {
-            console.log('elRef.current', editorElRef.current);
             if ( ! editorElRef.current) {
                 return;
             }
