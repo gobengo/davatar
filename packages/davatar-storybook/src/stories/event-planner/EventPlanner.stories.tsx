@@ -234,8 +234,17 @@ export const Collaboration: ComponentStory<typeof EventPlanner> = (args) => {
       },
       [state.event],
   );
+  const onClickSetToIIW = React.useCallback(
+      () => {
+          Object.assign(state.event, IIW34());
+        //   console.log('setting state.event to values from IIW34');
+        //   makeValidEvent(state.event, IIW34(), state.event);
+      },
+      [makeValidEvent, state.event, IIW34],
+  );
   return (
     <>
+      <button onClick={onClickSetToIIW}>Set to IIW34</button>
       <div style={{ display: "flex" }}>
         {new Array(numPeers).fill(0).map((e, index) => {
           return (
