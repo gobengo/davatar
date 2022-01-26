@@ -1,14 +1,17 @@
 import * as React from "react";
 import type { EventAdder } from "./EventPlanner";
 import type { JSONDatetime, PlannableEvent } from "./types";
+import type * as Y from "yjs";
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 export const EventHomePage = function ({
   event,
   addEvent,
+  descriptionYjsDoc,
 }: {
   event: PlannableEvent;
   addEvent?: EventAdder;
+  descriptionYjsDoc?: Y.Doc;
 }) {
   const formattedBeginning = React.useMemo(() => {
     return formatEventTime(parseJSONDatetime(event.beginning));
@@ -26,7 +29,13 @@ export const EventHomePage = function ({
           </>
         )}
       </header>
-      <p>{event.description}</p>
+      <>
+          <h2>Description</h2>
+          <p>{event.description}</p>
+          {descriptionYjsDoc ? <>
+            <h3>Description is Editable</h3>
+          </> : <>(description is not editable)</>}
+      </>
       <>
         <h2>Date and time</h2>
         <div className="event-details__data">

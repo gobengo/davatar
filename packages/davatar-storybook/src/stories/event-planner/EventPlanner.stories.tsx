@@ -1,6 +1,7 @@
 import React from "react";
 import type { ComponentStory, ComponentMeta } from "@storybook/react";
-import type { AddressLocation, JSONDatetime, PlannableEvent } from "davatar-ui";
+import type { AddressLocation, JSONDatetime, PlannableEvent} from "davatar-ui";
+import { YTextEditor } from "davatar-ui";
 import { EventPlanner } from "davatar-ui";
 import type { Y } from "@syncedstore/core";
 import { syncedStore, getYjsValue } from "@syncedstore/core";
@@ -161,6 +162,9 @@ function makeValidEvent(input: Partial<PlannableEvent>, template?: Partial<Plann
   if (!input.name) {
     output.name = template?.name || `Event id=${input.id}`;
   }
+  if ( ! input.description) {
+      output.description = template?.description || '';
+  }
   if (!input.organizers) {
     output.organizers = template?.organizers || [];
   }
@@ -198,6 +202,10 @@ export const Collaboration: ComponentStory<typeof EventPlanner> = (args) => {
     [collaborationStore],
   );
   const state = useSyncedStore(collaborationStore);
+  const yjsDoc = getYjsValue(state);
+  const eventYjsDoc = getYjsValue(state.event);
+  const eventDescriptionYjsDoc = getYjsValue(state.event.description);
+  console.log('collaboration yjsDoc', { yjsDoc, eventYjsDoc, eventDescriptionYjsDoc });
   const addEvent = React.useCallback(
       () => {
           const { event } = state;
@@ -226,11 +234,54 @@ export const Collaboration: ComponentStory<typeof EventPlanner> = (args) => {
         {new Array(numPeers).fill(0).map((e, index) => {
           return (
             <div key={index} style={{ flexGrow: 1 }}>
-              <EventPlanner event={fullEvent} addEvent={addEvent} />
+              <EventPlanner
+                event={fullEvent}
+                addEvent={addEvent}
+                
+                />
             </div>
           );
         })}
       </div>
     </>
   );
+};
+
+const singleEventStore = syncedStore({
+    name: 'text',
+    description: 'text',
+});
+
+export const EditingEventDescription: ComponentStory<typeof EventPlanner> = (args) => {
+    const numPeers = 2;
+    const state = useSyncedStore(singleEventStore);
+    React.useEffect(
+        () => {
+            state.name.insert(0, "insertedName");
+            state.description.insert(0, "insertedDescription");
+        },
+        [],
+    );
+    return <>
+          <div style={{ display: "flex" }}>
+        {new Array(numPeers).fill(0).map((e, index) => {
+          return (
+            <div key={index} style={{ flexGrow: 1 }}>
+              <pre>{JSON.stringify(state, null, 2)}</pre>
+              <dl>
+                  <dt>name</dt><dd>
+                      <dl>
+                          <dt>read</dt>
+                            <dd>{state.name.toJSON()}</dd>
+                        <dt>edit</dt>
+                            <YTextEditor text={state.name} />
+                      </dl>
+                  </dd>
+                  <dt>description</dt><dd>{state.description.toJSON()}</dd>
+              </dl>
+            </div>
+          );
+        })}
+      </div>
+    </>;
 };
