@@ -181,26 +181,16 @@ function makeValidEvent(input: Partial<PlannableEvent>, template?: Partial<Plann
 
 export const Collaboration: ComponentStory<typeof EventPlanner> = (args) => {
   const numPeers = 2;
-  const [providerDidSync, setProviderDidSync] = React.useState(false);
   React.useEffect(
     () => {
         const yjsDoc = getYjsValue(collaborationStore);
         if ( ! yjsDoc) {
             throw new Error('failed to getYjsValue from syncedStore');
         }
-        console.log('Collaboration yjsDoc', yjsDoc);
         const provider = new WebrtcProvider(
             'davatar-storybook-event-planner-collaboration',
             yjsDoc as Y.Doc,
         );
-        provider.on('synced', () => {
-            console.log('BEN PROVIDER SYNCED');
-            setProviderDidSync(true);
-        });
-        provider.on('peers', () => {
-            console.log('BEN PROVIDER PEERS');
-            setProviderDidSync(true);
-        });
         return () => {
             return provider.destroy();
         };
@@ -208,16 +198,6 @@ export const Collaboration: ComponentStory<typeof EventPlanner> = (args) => {
     [collaborationStore],
   );
   const state = useSyncedStore(collaborationStore);
-  React.useEffect(
-      () => {
-          if (providerDidSync) {
-              console.log('provider did sync!', JSON.stringify(state.event));
-          }
-      },
-      [providerDidSync, state],
-  );
-  console.log({ providerDidSync });
-  const [collaborationProvider, setCollaborationProvider] = React.useState(null);
   const addEvent = React.useCallback(
       () => {
           const { event } = state;
@@ -227,7 +207,6 @@ export const Collaboration: ComponentStory<typeof EventPlanner> = (args) => {
       },
       [event],
   );
-  console.log('collaborationStore.event', JSON.stringify(collaborationStore.event));
   const fullEvent = React.useMemo(
       () => {
           return makeValidEvent(state.event, undefined);
@@ -237,8 +216,6 @@ export const Collaboration: ComponentStory<typeof EventPlanner> = (args) => {
   const onClickSetToIIW = React.useCallback(
       () => {
           Object.assign(state.event, IIW34());
-        //   console.log('setting state.event to values from IIW34');
-        //   makeValidEvent(state.event, IIW34(), state.event);
       },
       [makeValidEvent, state.event, IIW34],
   );
