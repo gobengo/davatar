@@ -153,33 +153,35 @@ function createJSONDatetime(date: Date): JSONDatetime {
     return { iso8601: date.toISOString() };
 }
 
-function makeValidEvent(input: Partial<PlannableEvent>): PlannableEvent {
+function makeValidEvent(input: Partial<PlannableEvent>, template?: Partial<PlannableEvent>, suggestedOutput?: Partial<PlannableEvent>): PlannableEvent {
+  const output = suggestedOutput || Object.create(input);
   if (!input.id) {
-    input.id = createIdString();
+    output.id = template?.id || createIdString();
   }
   if (!input.name) {
-    input.name = `Event id=${input.id}`;
+    output.name = template?.name || `Event id=${input.id}`;
   }
   if (!input.organizers) {
-    input.organizers = [];
+    output.organizers = template?.organizers || [];
   }
   if (!input.beginning) {
-    input.beginning = createJSONDatetime(new Date());
+    output.beginning = template?.beginning || createJSONDatetime(new Date());
   }
   if (!input.end) {
-    input.end = createJSONDatetime(new Date());
+    output.end = template?.end || createJSONDatetime(new Date());
   }
   if (!input.location) {
-      input.location = ComputerHistoryMuseumLocation();
+    output.location = template?.location || ComputerHistoryMuseumLocation();
   }
   if ( ! input.subEvents) {
-      input.subEvents = [];
+    output.subEvents = template?.subEvents || [];
   }
-  return input as PlannableEvent;
+  return output as PlannableEvent;
 }
 
 export const Collaboration: ComponentStory<typeof EventPlanner> = (args) => {
   const numPeers = 2;
+  const [providerDidSync, setProviderDidSync] = React.useState(false);
   React.useEffect(
     () => {
         const yjsDoc = getYjsValue(collaborationStore);
@@ -191,6 +193,14 @@ export const Collaboration: ComponentStory<typeof EventPlanner> = (args) => {
             'davatar-storybook-event-planner-collaboration',
             yjsDoc as Y.Doc,
         );
+        provider.on('synced', () => {
+            console.log('BEN PROVIDER SYNCED');
+            setProviderDidSync(true);
+        });
+        provider.on('peers', () => {
+            console.log('BEN PROVIDER PEERS');
+            setProviderDidSync(true);
+        });
         return () => {
             return provider.destroy();
         };
@@ -198,26 +208,39 @@ export const Collaboration: ComponentStory<typeof EventPlanner> = (args) => {
     [collaborationStore],
   );
   const state = useSyncedStore(collaborationStore);
-  const event = React.useMemo(
-      () => makeValidEvent(state.event),
-      [state.event],
+  React.useEffect(
+      () => {
+          if (providerDidSync) {
+              console.log('provider did sync!', JSON.stringify(state.event));
+          }
+      },
+      [providerDidSync, state],
   );
+  console.log({ providerDidSync });
   const [collaborationProvider, setCollaborationProvider] = React.useState(null);
   const addEvent = React.useCallback(
       () => {
-          console.log('Collaboration addEvent', event.subEvents);
-          event.subEvents.push(IIW34ClosingCeremony());
+          const { event } = state;
+          if (event.subEvents) {
+            event.subEvents.push(IIW34ClosingCeremony());
+          }
       },
       [event],
   );
   console.log('collaborationStore.event', JSON.stringify(collaborationStore.event));
+  const fullEvent = React.useMemo(
+      () => {
+          return makeValidEvent(state.event, undefined);
+      },
+      [state.event],
+  );
   return (
     <>
       <div style={{ display: "flex" }}>
         {new Array(numPeers).fill(0).map((e, index) => {
           return (
             <div key={index} style={{ flexGrow: 1 }}>
-              <EventPlanner event={event} addEvent={addEvent} />
+              <EventPlanner event={fullEvent} addEvent={addEvent} />
             </div>
           );
         })}
