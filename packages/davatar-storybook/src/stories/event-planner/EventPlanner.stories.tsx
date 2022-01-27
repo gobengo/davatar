@@ -302,7 +302,7 @@ class YjsPlannableEvent implements PlannableEvent {
     const newEvent: PlannableEvent = {
       beginning: { iso8601: (new Date).toISOString() },
       description: '',
-      end: { iso8601: (new Date).toISOString(), },
+      end: { iso8601: (new Date).toISOString() },
       id: createIdString(),
       location: ComputerHistoryMuseumLocation(),
       name: 'New subEvent',
