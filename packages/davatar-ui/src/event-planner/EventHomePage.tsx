@@ -1,14 +1,32 @@
 import * as React from "react";
 import type { EventAdder } from "./EventPlanner";
 import type { JSONDatetime, PlannableEvent } from "./types";
+import type * as Y from "yjs";
+import { YTextEditor } from "../editor-quill/YTextEditor";
+
+function MaybeEditable(props: {
+  fallback: React.ComponentType;
+  yjs?: Y.Text;
+}) {
+  const Fallback = props.fallback;
+  if (props.yjs) {
+    return <YTextEditor text={props.yjs} />;
+  }
+  return <Fallback />;
+}
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 export const EventHomePage = function ({
   event,
   addEvent,
+  yjsDocs,
 }: {
   event: PlannableEvent;
   addEvent?: EventAdder;
+  yjsDocs?: {
+    name?: Y.Text,
+    description?: Y.Text,
+  }
 }) {
   const formattedBeginning = React.useMemo(() => {
     return formatEventTime(parseJSONDatetime(event.beginning));
@@ -19,14 +37,21 @@ export const EventHomePage = function ({
   return (
     <>
       <header>
-        <h1>{event.name}</h1>
-        {event.organizers.length && (
+        <h1>
+          <MaybeEditable fallback={() => <>{event.name}</>} yjs={yjsDocs?.name} />
+        </h1>
+        {event.organizers.length ? (
           <>
             <p>by {event.organizers.map((o) => o.name).join(", ")}</p>
           </>
-        )}
+        ) : ''}
       </header>
-      <p>{event.description}</p>
+      <>
+        <h2>Description</h2>
+        <MaybeEditable
+          yjs={yjsDocs?.description}
+          fallback={() => <p>{event.description}</p>} />
+      </>
       <>
         <h2>Date and time</h2>
         <div className="event-details__data">
