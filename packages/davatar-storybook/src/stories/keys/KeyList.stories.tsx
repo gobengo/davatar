@@ -17,7 +17,20 @@ export default {
   },
 } as ComponentMeta<typeof KeyList>;
 
-const Template: ComponentStory<typeof KeyList> = (args) => <KeyList {...args} />;
+const Template: ComponentStory<typeof KeyList> = (args) => {
+    const [keys, setKeys] = React.useState(args.cryptoKeys);
+    const createKey = React.useCallback(
+        () => {
+            const newKeys = [
+                ...keys,
+                SampleKey(),
+            ];
+            setKeys(newKeys);
+        },
+        [keys, setKeys],
+    );
+    return <KeyList cryptoKeys={keys} createKey={createKey} />;
+};
 
 export const EmptyList = Template.bind({});
 
