@@ -23,6 +23,8 @@
     "davatar-ui": "file:../davatar-ui",
     "did-resolver": "^3.1.5",
     "ethr-did-resolver": "^5.0.4",
+    "multibase": "^4.0.6",
+    "multicodec": "^3.2.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "styled-components": "^5.3.3",
