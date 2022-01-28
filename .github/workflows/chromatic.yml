@@ -17,7 +17,9 @@ jobs:
         with:
           swap-size-gb: 10
       - run: npm install --workspaces
-        #👇 Adds Chromatic as a step in the workflow
+      - run: ./node_modules/.bin/build-storybook
+        env:
+          NODE_OPTIONS: --max_old_space_size=8192
       - uses: chromaui/action@v1
         env:
           NODE_OPTIONS: --max_old_space_size=8192
