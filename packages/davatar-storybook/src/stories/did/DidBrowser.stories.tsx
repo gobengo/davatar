@@ -4,9 +4,10 @@ import type { ComponentStory, ComponentMeta } from "@storybook/react";
 import type { IIdentifier, IKey } from "davatar-ui";
 import { DidBrowser } from "davatar-ui";
 import * as tweetnacl from "tweetnacl";
-import { BrowserKms } from "../veramo/setup";
 import Multibase from "multibase";
 import Multicodec from "multicodec";
+import { MemoryKeyStore, MemoryPrivateKeyStore } from '@veramo/key-manager';
+import { KeyManagementSystem } from '@veramo/kms-local';
 
 const defaultProps: Parameters<typeof DidBrowser>[0] = {
   dids: [],
@@ -53,7 +54,7 @@ export const Addable = WithStateTemplate.bind({});
 async function SampleDid(
   alias = `bengo-did-${Math.random().toString().slice(2)}`
 ): Promise<IIdentifier> {
-  const kms = BrowserKms();
+  const kms = new KeyManagementSystem(new MemoryPrivateKeyStore);
   const key = await kms.createKey({ type: "Ed25519" });
   const multibaseBytes = Multibase.encode(
     "base58btc",

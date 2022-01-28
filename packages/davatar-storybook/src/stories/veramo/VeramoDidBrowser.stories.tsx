@@ -5,7 +5,6 @@ import type { IIdentifier} from "davatar-ui";
 import { DidBrowser, IKey } from "davatar-ui";
 import { KeyList } from "davatar-ui";
 import * as tweetnacl from "tweetnacl";
-import { BrowserKms } from "./setup";
 import { DIDManager, MemoryDIDStore } from '@veramo/did-manager';
 import { KeyManager, MemoryKeyStore, MemoryPrivateKeyStore } from '@veramo/key-manager';
 import { KeyDIDProvider } from '@veramo/did-provider-key';
@@ -40,7 +39,7 @@ function VeramoDidBrowser(props: {
 }) {
   const [needsFetch, setNeedsFetch] = React.useState(true);
   const [dids, setDids] = React.useState<IIdentifier[]>([]);
-  const [kms] = React.useState(() => BrowserKms());
+  const [kms] = React.useState(() => new KeyManagementSystem(new MemoryPrivateKeyStore()));
   const [didManager] = React.useState(() => {
       return new DIDManager({
           providers: {

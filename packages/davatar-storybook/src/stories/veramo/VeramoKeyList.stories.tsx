@@ -4,8 +4,9 @@ import type { ComponentStory, ComponentMeta } from "@storybook/react";
 import type { IKey } from "davatar-ui";
 import { KeyList } from "davatar-ui";
 import * as tweetnacl from "tweetnacl";
-import { BrowserKms } from "./setup";
 import type { ManagedKeyInfo } from "@veramo/core";
+import { KeyManagementSystem } from "@veramo/kms-local";
+import { KeyManager, MemoryKeyStore, MemoryPrivateKeyStore } from '@veramo/key-manager';
 
 export default {
   title: "veramo/VeramoKeyList",
@@ -31,7 +32,7 @@ function VeramoKeyList(props: {
 }) {
   const [needsKmsFetch, setNeedsKmsFetch] = React.useState(true);
   const [keys, setKeys] = React.useState<ManagedKeyInfo[]>([]);
-  const [kms] = React.useState(() => BrowserKms());
+  const [kms] = React.useState(() => new KeyManagementSystem(new MemoryPrivateKeyStore()));
   // With a new kms, create initial keys
   const createCountKeys = React.useCallback(
       () => {
