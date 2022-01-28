@@ -12,6 +12,10 @@ jobs:
     # Job steps
     steps:
       - uses: actions/checkout@v1
+      - name: Set Swap Space
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 10
       - run: npm install --workspaces
         #👇 Adds Chromatic as a step in the workflow
       - uses: chromaui/action@v1
