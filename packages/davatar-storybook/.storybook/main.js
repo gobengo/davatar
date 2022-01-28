@@ -4,6 +4,7 @@ const builtins = require('builtin-modules');
 const {default: resolve} = require('@rollup/plugin-node-resolve');
 const commonjs = require('@rollup/plugin-commonjs');
 const analyze = require('rollup-plugin-analyzer')
+const inject = require('@rollup/plugin-inject');
 
 module.exports = {
   "stories": [
@@ -26,6 +27,9 @@ module.exports = {
         plugins: [
           resolve(),
           commonjs(),
+          inject({
+            modules: { Buffer: ['buffer', 'Buffer'], }
+          }),
           ...config.build?.rollupOptions?.plugins || [],
           analyze(),
         ],

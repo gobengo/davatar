@@ -18,6 +18,7 @@ jobs:
           swap-size-gb: 10
       - run: npm install --workspaces
       - run: ./node_modules/.bin/build-storybook
+        working-directory: ./packages/davatar-storybook
         env:
           NODE_OPTIONS: --max_old_space_size=8192
       - uses: chromaui/action@v1
