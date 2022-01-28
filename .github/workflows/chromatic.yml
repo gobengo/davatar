@@ -20,7 +20,7 @@ jobs:
         #👇 Adds Chromatic as a step in the workflow
       - uses: chromaui/action@v1
         env:
-          NODE_OPTIONS: --max_old_space_size=1536
+          NODE_OPTIONS: --max_old_space_size=8192
         # Options required for Chromatic's GitHub Action
         with:
           #👇 Chromatic projectToken, see https://storybook.js.org/tutorials/intro-to-storybook/react/en/deploy/ to obtain it
