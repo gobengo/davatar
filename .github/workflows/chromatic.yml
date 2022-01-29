@@ -13,7 +13,6 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - run: npm install --workspaces
-        #👇 Adds Chromatic as a step in the workflow
       - uses: chromaui/action@v1
         # Options required for Chromatic's GitHub Action
         with:

@@ -37,6 +37,7 @@
     "@types/chai": "^4.2.22",
     "@types/cucumber": "^7.0.0",
     "@types/electron-devtools-installer": "2.2.0",
+    "@types/node": "^16.0.0",
     "@typescript-eslint/eslint-plugin": "5.2.0",
     "@typescript-eslint/parser": "^5.2.0",
     "chai": "^4.3.4",
