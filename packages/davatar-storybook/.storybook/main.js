@@ -5,6 +5,7 @@ const {default: resolve} = require('@rollup/plugin-node-resolve');
 const commonjs = require('@rollup/plugin-commonjs');
 const analyze = require('rollup-plugin-analyzer')
 const inject = require('@rollup/plugin-inject');
+const path = require('path');
 
 module.exports = {
   "stories": [
@@ -19,17 +20,20 @@ module.exports = {
   "core": {
     "builder": "storybook-builder-vite"
   },
+  features: {
+    storyStoreV7: true,
+  },
   async viteFinal(config, { configType }) {
     config.build = {
       ...config.build,
       rollupOptions: {
         ...config.build?.rollupOptions,
         plugins: [
+          inject({
+            Buffer: ['buffer', 'Buffer'],
+          }),
           resolve(),
           commonjs(),
-          inject({
-            modules: { Buffer: ['buffer', 'Buffer'], }
-          }),
           ...config.build?.rollupOptions?.plugins || [],
           analyze(),
         ],
