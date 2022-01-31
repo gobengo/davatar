@@ -9,6 +9,20 @@ const defaultProps: Parameters<typeof KeyList>[0] = {
     cryptoKeys: [],
 };
 
+export function hexEncode(bytes: Uint8Array): string {
+    const hex = Array.from(bytes).map(b => b.toString(16)).join('');
+    return hex;
+}
+
+function SampleKey(kid=`bengo-kid-${Math.random().toString().slice(2)}`): IKey {
+    const keyPair = tweetnacl.sign.keyPair();
+    return {
+        kid,
+        type: 'Ed25519',
+        publicKeyHex: hexEncode(keyPair.publicKey),
+    };
+}
+
 export default {
   title: 'keys/KeyList',
   component: KeyList,
@@ -41,17 +55,3 @@ export const ManyKeys = Template.bind({});
 ManyKeys.args = {
     cryptoKeys: new Array(10).fill(0).map(() => SampleKey()),
 };
-
-function SampleKey(kid=`bengo-kid-${Math.random().toString().slice(2)}`): IKey {
-    const keyPair = tweetnacl.sign.keyPair();
-    return {
-        kid,
-        type: 'Ed25519',
-        publicKeyHex: hexEncode(keyPair.publicKey),
-    };
-}
-
-function hexEncode(bytes: Uint8Array): string {
-    const hex = Array.from(bytes).map(b => b.toString(16)).join('');
-    return hex;
-}
