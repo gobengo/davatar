@@ -6,14 +6,13 @@ import * as tweetnacl from "tweetnacl";
 import { hexEncode } from '../keys/KeyList.stories';
 
 type CredentialSubject = { name: string };
-const defaultCreateCredential: ICredentialCreator<CredentialSubject> = (options) => {
+const defaultCreateCredential: ICredentialCreator<CredentialSubject> = async (options) => {
     return {
         credentialSubject: options.credentialSubject,
     };
 };
 
 const defaultProps: ISelfCredentialCreatorProps<CredentialSubject> = {
-    ed25519PublicKeyHex: hexEncode(tweetnacl.sign.keyPair().publicKey),
     createCredential: defaultCreateCredential,
 };
 
