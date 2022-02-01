@@ -9,3 +9,4 @@ export * from './editor-quill/QuillEditor';
 export * from './keys';
 export * from './did';
 export * from './self-credentials/SelfCredentialCreator';
+export * from './chat';
