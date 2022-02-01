@@ -3,7 +3,7 @@ import type { ComponentStory, ComponentMeta } from '@storybook/react';
 import type { ICredentialCreator, ISelfCredentialCreatorProps } from 'davatar-ui';
 import { SelfCredentialCreator } from 'davatar-ui';
 import * as tweetnacl from "tweetnacl";
-import { hexEncode } from '../keys/KeyList.stories';
+import { hexEncode } from '../../hex';
 
 type CredentialSubject = { name: string };
 const defaultCreateCredential: ICredentialCreator<CredentialSubject> = async (options) => {

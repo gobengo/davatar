@@ -61,6 +61,9 @@ export const SelfCredentialCreator = function (
       <pre style={{ wordBreak: "break-all", whiteSpace: "pre-wrap" }}>
         {JSON.stringify(credential, null, 2)}
       </pre>
+      <p>
+          <button>Save Credential</button>
+      </p>
     </>
   );
 };

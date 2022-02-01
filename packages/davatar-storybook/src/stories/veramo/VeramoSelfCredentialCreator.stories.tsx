@@ -2,7 +2,6 @@ import * as React from "react";
 import type { ComponentStory, ComponentMeta } from "@storybook/react";
 import type { ICredentialCreator } from "davatar-ui";
 import { SelfCredentialCreator } from "davatar-ui";
-import { hexEncode } from "../keys/KeyList.stories";
 import tweetnacl from "tweetnacl";
 import { veramoAgent } from "./veramo";
 import type { IIdentifier } from "@veramo/core";

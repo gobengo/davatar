@@ -4,15 +4,11 @@ import type { ComponentStory, ComponentMeta } from '@storybook/react';
 import type { IKey } from 'davatar-ui';
 import { KeyList } from 'davatar-ui';
 import * as tweetnacl from "tweetnacl";
+import { hexEncode } from '../../hex';
 
 const defaultProps: Parameters<typeof KeyList>[0] = {
     cryptoKeys: [],
 };
-
-export function hexEncode(bytes: Uint8Array): string {
-    const hex = Array.from(bytes).map(b => b.toString(16)).join('');
-    return hex;
-}
 
 function SampleKey(kid=`bengo-kid-${Math.random().toString().slice(2)}`): IKey {
     const keyPair = tweetnacl.sign.keyPair();
