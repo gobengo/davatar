@@ -21,13 +21,17 @@ export interface IChatState {
 export const Chat = function (props: IChatState) {
   return (
     <>
-      <strong>Participants</strong>
+      <header>
+        <strong>Participants</strong>
+      </header>
       <ul>
         {props.participants.map((participant, index) => (
           <li key={participant.id || index}>{participant.name}</li>
         ))}
       </ul>
-      <strong>Messages</strong>
+      <header>
+        <strong>Messages</strong>
+      </header>
       <ul>
         {props.messages.map((message, index) => (
           <li key={"id" in message ? message.id : index}>
