@@ -15,22 +15,15 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "react",
-    "typeRoots": [
-      "./types",
-      "./node_modules/@types",
-    ],
+    "typeRoots": ["./node_modules/@types"],
     "paths": {
-      "/@/*": [
-        "./src/*"
-      ],
-      "react-router": ["./types/react-router"]
-    },
+      "/@/*": ["./src/*"],
+      "react-router": ["./types/react-router"],
+      "@transmute/lds-ecdsa-secp256k1-recovery2020": [
+        "./types/@transmute/lds-ecdsa-secp256k1-recovery2020"
+      ]
+    }
   },
-  "include": [
-    "./src",
-    "types/**/*.d.ts",
-  ],
-  "references": [
-    {"path": "../davatar-ui/tsconfig.json"}
-  ]
+  "include": ["./src", "types/**/*.d.ts"],
+  "references": [{ "path": "../davatar-ui/tsconfig.json" }]
 }

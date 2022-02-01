@@ -7,7 +7,7 @@
         "./src/*"
       ]
     },
-    "lib": ["ESNext", "dom", "dom.iterable"],
+    "lib": ["ESNext", "dom", "dom.iterable", "es2017.object"],
   },
 
   "include": [

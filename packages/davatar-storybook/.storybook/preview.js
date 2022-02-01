@@ -1,4 +1,4 @@
-import {default as BufferModule} from "buffer";
+import * as BufferModule from "buffer/";
 
 // define this for any dependencies that expect this nodejs global
 globalThis.Buffer = BufferModule.Buffer;

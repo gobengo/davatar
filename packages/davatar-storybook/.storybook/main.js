@@ -29,18 +29,12 @@ module.exports = {
       rollupOptions: {
         ...config.build?.rollupOptions,
         plugins: [
-          inject({
-            Buffer: ['buffer', 'Buffer'],
-          }),
           resolve(),
-          commonjs(),
           ...config.build?.rollupOptions?.plugins || [],
-          analyze(),
         ],
         external: builtins,
         output: {
           ...config.build?.rollupOptions?.output,
-          // manualChunks: {}
         }
       }
     }
