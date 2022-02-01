@@ -1,6 +1,6 @@
 import React from "react";
 import type { ComponentStory, ComponentMeta } from "@storybook/react";
-import type { IChatParticipant, IChatMessage } from "davatar-ui";
+import type { IChatParticipant, IChatMessage, IChatState } from "davatar-ui";
 import { Chat } from "davatar-ui";
 import * as didMethodKey from "@digitalbazaar/did-method-key";
 
@@ -51,6 +51,20 @@ const Template: ComponentStory<typeof Chat> = (args) => {
 export const DefaultProps = Template.bind({});
 
 const MutableTemplate: ComponentStory<typeof Chat> = (args) => {
+  const [chat, actions] = useChatState();
+  return (
+    <>
+      <ChatActionButtons {...actions} />
+      <div>
+        <h1>Mutable Chat</h1>
+        <Chat {...args} {...chat} />
+      </div>
+    </>
+  );
+};
+export const Mutable = MutableTemplate.bind({});
+
+function useChatState() {
   const [participants, setParticipants] = React.useState(
     [] as IChatParticipant[]
   );
@@ -71,17 +85,75 @@ const MutableTemplate: ComponentStory<typeof Chat> = (args) => {
       ]),
     [setMessages]
   );
+  const actions = {
+    addMessage,
+    addParticipant,
+  };
+  const chatState = React.useMemo(() => {
+    return { participants, messages };
+  }, [participants, messages]);
+  return [chatState, actions] as const;
+}
+
+// eslint-disable-next-line @typescript-eslint/ban-types
+export const NChats = (props: {}) => {
+  const [chatCount, setChatCount] = React.useState(1);
+  const chatCountInputRef = React.useRef<HTMLInputElement | null>(null);
+  const onChangeChatCount = React.useCallback(() => {
+    const value = chatCountInputRef.current?.value;
+    if (typeof value === "undefined") return;
+    const valueParsed = parseInt(value, 10);
+    if (isNaN(valueParsed)) return;
+    setChatCount(valueParsed);
+  }, []);
+  const [chatState, actions] = useChatState();
+  const SingleChat = () => <Chat {...chatState} />;
   return (
     <>
+      <h1>N Chats</h1>
+      <ChatActionButtons {...actions} />
       <div>
-        <button onClick={addParticipant}>Add Participant</button>
-        <button onClick={addMessage}>Add Message</button>
+        <label>Chat Count</label>
+        <input
+          name="chatCount"
+          onChange={onChangeChatCount}
+          ref={chatCountInputRef}
+          type="number"
+          step="1"
+          min="1"
+          value={chatCount}
+        />
       </div>
-      <div>
-        <h1>Mutable Chat</h1>
-        <Chat {...args} {...{ participants, messages }} />
-      </div>
+      <br />
+      <FlexColumns count={chatCount} Child={SingleChat} />
     </>
   );
 };
-export const Mutable = MutableTemplate.bind({});
+
+function FlexColumns(props: {
+    count: number
+    Child: () => JSX.Element
+}) {
+    const { Child } = props;
+    return <>
+      <div style={{ display: "flex" }}>
+        {(new Array(props.count)).fill(undefined).map((chat, index) => (
+          <div key={index} style={{ flex: "1 1 auto" }}>
+            <Child />
+          </div>
+        ))}
+      </div>
+    </>;
+}
+
+function ChatActionButtons(props: {
+  addMessage: () => void;
+  addParticipant: () => void;
+}) {
+  return (
+    <div>
+      <button onClick={props.addParticipant}>Add Participant</button>
+      <button onClick={props.addMessage}>Add Message</button>
+    </div>
+  );
+}
