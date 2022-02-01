@@ -5,3 +5,4 @@ dist-ssr
 *.local
 src/**/*.js
 src/**/*.d.ts
+!src/declarations.d.ts
