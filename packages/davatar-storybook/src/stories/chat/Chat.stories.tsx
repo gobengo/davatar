@@ -77,7 +77,7 @@ function useChatState() {
     [setParticipants]
   );
   const [messages, setMessages] = React.useState([] as IChatMessage[]);
-  const addMessage = React.useCallback(
+  const addRandomMessage = React.useCallback(
     () =>
       setMessages((oldMessages) => [
         ...oldMessages,
@@ -86,7 +86,7 @@ function useChatState() {
     [setMessages]
   );
   const actions = {
-    addMessage,
+    addRandomMessage,
     addParticipant,
   };
   const chatState = React.useMemo(() => {
@@ -97,7 +97,7 @@ function useChatState() {
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 export const NChats = (props: {}) => {
-  const [chatCount, setChatCount] = React.useState(1);
+  const [chatCount, setChatCount] = React.useState(2);
   const chatCountInputRef = React.useRef<HTMLInputElement | null>(null);
   const onChangeChatCount = React.useCallback(() => {
     const value = chatCountInputRef.current?.value;
@@ -147,13 +147,21 @@ function FlexColumns(props: {
 }
 
 function ChatActionButtons(props: {
-  addMessage: () => void;
+  addRandomMessage: () => void;
   addParticipant: () => void;
 }) {
   return (
     <div>
       <button onClick={props.addParticipant}>Add Participant</button>
-      <button onClick={props.addMessage}>Add Message</button>
+      <button onClick={props.addRandomMessage}>Add Message</button>
     </div>
   );
 }
+
+export const WithInput = () => {
+    const [chatState, actions] = useChatState();
+    return <>
+        <h1>With Input</h1>
+        <Chat {...chatState} />
+    </>;
+};
