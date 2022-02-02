@@ -21,7 +21,7 @@ export const ProsemirrorEditor = function <N extends string, M extends string>(p
             });
             return view;
         },
-        [props.state]
+        [props]
     );
     const editorRef = React.useCallback(
         (element: HTMLDivElement | null) => {
@@ -76,7 +76,7 @@ export function CustomEditorProvider<A extends string,B extends string>(props: {
             console.log('CustomEditorProvider created new EditorView', { doc: editorState.doc, pmDocView });
             return pmDocView;
         },
-        [editorState.doc]
+        [editorState, docToView]
     );
     return (
         <CustomEditorStateContext.Provider value={editorState}>

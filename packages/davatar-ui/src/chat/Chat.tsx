@@ -9,7 +9,7 @@ export interface IChatMessage {
   id: string;
   attributedTo: IChatParticipant;
   content: string;
-  mediaType: string;
+  mediaType: 'text/plain';
 }
 
 export interface IChatState {
@@ -17,8 +17,14 @@ export interface IChatState {
   messages: Array<Promise<IChatMessage> | IChatMessage>;
 }
 
+export type IChatMessageContent = Omit<IChatMessage, 'id'|'attributedTo'>
+
+export interface IChatActions {
+    onMessage?(action: IChatMessageContent): void;
+}
+
 // eslint-disable-next-line @typescript-eslint/ban-types
-export const Chat = function (props: IChatState) {
+export const Chat = function (props: IChatState & IChatActions) {
   return (
     <>
       <header>
@@ -39,9 +45,45 @@ export const Chat = function (props: IChatState) {
           </li>
         ))}
       </ul>
+      {props.onMessage ? <>
+      <header>
+          <strong>Add a Message</strong>
+      </header>
+        <PlaintextMessageForm onMessage={props.onMessage} />
+      </> : <></>}
     </>
   );
 };
+
+function PlaintextMessageForm(props: {
+    onMessage(content: IChatMessageContent): void;
+}) {
+    const messageTextRef = React.useRef<HTMLInputElement|null>(null);
+    const onFormSubmit = React.useCallback(
+        (event: React.FormEvent<HTMLFormElement>) => {
+            event.preventDefault();
+            const messageText = messageTextRef?.current?.value;
+            if (typeof messageText !== 'string') {
+                throw new Error('failed to read messageText from PlaintextMessageForm messageTextRef');
+            }
+            const content: IChatMessageContent = {
+                mediaType: 'text/plain' as const,
+                content: messageText,
+            };
+            props.onMessage(content);
+            if (messageTextRef.current) {
+              messageTextRef.current.value = '';
+            }
+        },
+        [props],
+    );
+    return <>
+        <form onSubmit={onFormSubmit}>
+            <input type="text" name="messageText" ref={messageTextRef} />
+            <input type="submit" />
+        </form>
+    </>;
+}
 
 export const Message = function (props: {
   message: IChatMessage | Promise<IChatMessage>;

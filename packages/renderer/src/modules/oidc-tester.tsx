@@ -24,7 +24,8 @@ export function OidcTester(props: {
   const { path } = useRouteMatch();
   const redirect_uri = React.useMemo(
     () => withoutLocationHash(location.toString()).toString(),
-    [location.toString()]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [location]
   );
   const sendAuthenticationRequestUrl = React.useMemo(() => {
     const state = {
@@ -54,7 +55,7 @@ export function OidcTester(props: {
       sendAuthenticationRequestUrl.searchParams.set(key, valueStr);
     }
     return sendAuthenticationRequestUrl.toString();
-  }, [props.authorizationEndpoint, redirect_uri]);
+  }, [props.authorizationEndpoint, redirect_uri, props.registration]);
   const claimsEnabled = {
     email: true,
   };
@@ -122,7 +123,7 @@ function RedirectUriHandler() {
       );
       // authentication.response = authenticationResponse;
     }
-  }, [authenticationResponse]);
+  }, [authenticationResponse, authentication]);
   const hashParamsObj = React.useMemo(
     () => Object.fromEntries(hashParams.entries()),
     [hashParams]

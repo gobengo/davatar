@@ -69,7 +69,7 @@ export const Scribe = (props: {
             }
             return yDoc;
         },
-        [room, rtcProviderRoomNameToYjs],
+        [room],
     );
     const collaborationProvider = React.useMemo(
         () => {
@@ -93,7 +93,7 @@ export const Scribe = (props: {
             }
             return rtcProviderRoomNameToYjs.get(room)?.provider;
         },
-        [rtcProviderRoomNameToYjs, yDoc, room],
+        [yDoc, room],
     );
     const onChangeDocumentMenu = React.useCallback((event: React.ChangeEvent<HTMLSelectElement>) => {
         const value = event.target.value;

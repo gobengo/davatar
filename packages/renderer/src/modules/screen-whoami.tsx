@@ -7,7 +7,7 @@ export default function WhoamiScreen() {
   const idTokenClaims = React.useMemo(() => {
     const response = authentication.response;
     return response && parseIdTokenClaims(response.id_token);
-  }, [authentication.response?.id_token]);
+  }, [authentication.response]);
   return (
     <>
       <div data-testid="WhoamiScreen"></div>

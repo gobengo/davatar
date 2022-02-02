@@ -37,7 +37,7 @@ function VeramoSelfCredentialCreator(props: {}) {
       const identifier: IIdentifier = await veramoAgent.didManagerGetOrCreate();
       setIssuerIdentifier(identifier);
     })();
-  }, [veramoAgent]);
+  }, []);
   const ed25519PublicKeyHex = React.useMemo(() => {
     const firstKey = issuerIdentifier?.keys[0];
     return firstKey?.publicKeyHex;
