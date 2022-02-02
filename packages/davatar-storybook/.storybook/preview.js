@@ -11,4 +11,10 @@ export const parameters = {
       date: /Date$/,
     },
   },
+  parameters: {
+    chromatic: {
+      // https://www.chromatic.com/docs/ignoring-elements#ignore-stories
+      disableSnapshot: false
+    },
+  }
 }
