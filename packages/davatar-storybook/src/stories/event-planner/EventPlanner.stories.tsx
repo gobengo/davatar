@@ -206,7 +206,7 @@ export const Collaboration: ComponentStory<typeof EventPlanner> = (args) => {
     return () => {
       return provider.destroy();
     };
-  }, [collaborationStore]);
+  }, []);
   const state = useSyncedStore(collaborationStore);
   const yjsDoc = getYjsValue(state);
   const eventYjsDoc = getYjsValue(state.event);
@@ -221,13 +221,13 @@ export const Collaboration: ComponentStory<typeof EventPlanner> = (args) => {
     if (event.subEvents) {
       event.subEvents.push(IIW34ClosingCeremony());
     }
-  }, [event]);
+  }, [state]);
   const fullEvent = React.useMemo(() => {
     return makeValidEvent(state.event, undefined);
   }, [state.event]);
   const onClickSetToIIW = React.useCallback(() => {
     Object.assign(state.event, IIW34());
-  }, [makeValidEvent, state.event, IIW34]);
+  }, [state]);
   return (
     <>
       <button onClick={onClickSetToIIW}>Set to IIW34</button>
@@ -402,7 +402,7 @@ export const EditingEvent: ComponentStory<typeof EventPlanner> = (
         "This event really will be one of the most amazing things of all time. It even has a great description here."
       );
     }
-  }, []);
+  }, [state.description, state.name]);
   const event = React.useMemo(() => {
     const yjsDoc = getYjsValue(state);
     if (!(yjsDoc instanceof Y.Doc)) {

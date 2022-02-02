@@ -31,7 +31,7 @@ function useOpenUrlEvents() {
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [onOpenUrl]);
   return latestOpenUrlEvent;
 }
 
@@ -117,7 +117,7 @@ function AuthenticationResponseRouter() {
         history.push(finalUrl);
       }
     },
-    [stateRedirectUri, idToken],
+    [stateRedirectUri, idToken, hashParams, history],
   );
   return <></>;
 }
@@ -152,7 +152,7 @@ function useAppControlMessages() {
         unsubscribe();
       };
     },
-    [],
+    [onAppControlMessage],
   );
   return { latestMessageEvent };
 }
@@ -178,7 +178,7 @@ function AppControlMessageHandler() {
           const x: never = latestMessageEvent;
       }
     },
-    [latestMessageEvent],
+    [latestMessageEvent, history],
   );
   return <></>;
 }
@@ -306,7 +306,7 @@ function AuthenticationStateStorer(props: {
       console.debug('AuthenticationStateStorer writing', authenticationContext.state);
       props.storage.write(authenticationContext.state);
     },
-    [authenticationContext.state, props.storedAuthenticationState, props.storage.write]
+    [authenticationContext.state, props.storedAuthenticationState, props.storage]
   );
   return <></>;
 }

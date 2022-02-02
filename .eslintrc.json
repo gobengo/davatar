@@ -16,13 +16,14 @@
     "ecmaVersion": 12,
     "sourceType": "module"
   },
-  "plugins": ["@typescript-eslint"],
+  "plugins": ["@typescript-eslint", "react-hooks"],
   "ignorePatterns": ["types/env.d.ts", "node_modules/**", "**/dist/**"],
   "rules": {
     "@typescript-eslint/no-unused-vars": "off",
     "@typescript-eslint/no-var-requires": "off",
     "@typescript-eslint/consistent-type-imports": "error",
-
+    "react-hooks/rules-of-hooks": "error", // Checks rules of Hooks
+    "react-hooks/exhaustive-deps": "warn", // Checks effect dependencies
     /**
      * Having a semicolon helps the optimizer interpret your code correctly.
      * This avoids rare errors in optimized code.

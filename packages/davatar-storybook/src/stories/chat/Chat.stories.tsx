@@ -1,6 +1,12 @@
 import React from "react";
 import type { ComponentStory, ComponentMeta } from "@storybook/react";
-import type { IChatParticipant, IChatMessage, IChatState } from "davatar-ui";
+import type {
+  IChatParticipant,
+  IChatState,
+  IChatActions,
+  IChatMessage,
+  IChatMessageContent,
+} from "davatar-ui";
 import { Chat } from "davatar-ui";
 import * as didMethodKey from "@digitalbazaar/did-method-key";
 
@@ -20,7 +26,7 @@ function createRandomMessages(
     return {
       id: createEphemeralId(),
       attributedTo: participant,
-      mediaType: "text/plain",
+      mediaType: "text/plain" as const,
       content: `I am message #${index} in a series by ${participant.name}`,
     };
   });
@@ -57,18 +63,18 @@ const MutableTemplate: ComponentStory<typeof Chat> = (args) => {
       <ChatActionButtons {...actions} />
       <div>
         <h1>Mutable Chat</h1>
-        <Chat {...args} {...chat} />
+        <Chat {...args} {...chat} {...actions} />
       </div>
     </>
   );
 };
 export const Mutable = MutableTemplate.bind({});
 
-function useChatState() {
+function useChatState(): [IChatState, IChatActions & IStorybookChatActions] {
   const [participants, setParticipants] = React.useState(
     [] as IChatParticipant[]
   );
-  const addParticipant = React.useCallback(
+  const addRandomParticipant = React.useCallback(
     () =>
       setParticipants((oldParticipants) => [
         ...oldParticipants,
@@ -85,14 +91,32 @@ function useChatState() {
       ]),
     [setMessages]
   );
-  const actions = {
-    addRandomMessage,
-    addParticipant,
-  };
+  const onMessage: IChatActions["onMessage"] = React.useCallback(
+    (content: IChatMessageContent) => {
+      if (!participants.length) {
+        addRandomParticipant();
+      }
+      const participant = participants[0];
+      const newMessage: IChatMessage = {
+        id: createEphemeralId(),
+        attributedTo: participant,
+        ...content,
+      };
+      setMessages((oldMessages) => [...oldMessages, newMessage]);
+    },
+    [setMessages, participants, addRandomParticipant]
+  );
+  const actions = React.useMemo(() => {
+    return {
+      addRandomMessage,
+      addRandomParticipant,
+      onMessage,
+    };
+  }, [addRandomParticipant, addRandomMessage, onMessage]);
   const chatState = React.useMemo(() => {
     return { participants, messages };
   }, [participants, messages]);
-  return [chatState, actions] as const;
+  return [chatState, actions];
 }
 
 // eslint-disable-next-line @typescript-eslint/ban-types
@@ -107,7 +131,7 @@ export const NChats = (props: {}) => {
     setChatCount(valueParsed);
   }, []);
   const [chatState, actions] = useChatState();
-  const SingleChat = () => <Chat {...chatState} />;
+  const SingleChat = () => <Chat {...chatState} {...actions} />;
   return (
     <>
       <h1>N Chats</h1>
@@ -130,38 +154,41 @@ export const NChats = (props: {}) => {
   );
 };
 
-function FlexColumns(props: {
-    count: number
-    Child: () => JSX.Element
-}) {
-    const { Child } = props;
-    return <>
+function FlexColumns(props: { count: number; Child: () => JSX.Element }) {
+  const { Child } = props;
+  return (
+    <>
       <div style={{ display: "flex" }}>
-        {(new Array(props.count)).fill(undefined).map((chat, index) => (
+        {new Array(props.count).fill(undefined).map((chat, index) => (
           <div key={index} style={{ flex: "1 1 auto" }}>
             <Child />
           </div>
         ))}
       </div>
-    </>;
+    </>
+  );
 }
 
-function ChatActionButtons(props: {
+interface IStorybookChatActions {
   addRandomMessage: () => void;
-  addParticipant: () => void;
-}) {
+  addRandomParticipant: () => void;
+}
+
+function ChatActionButtons(props: IStorybookChatActions) {
   return (
     <div>
-      <button onClick={props.addParticipant}>Add Participant</button>
+      <button onClick={props.addRandomParticipant}>Add Participant</button>
       <button onClick={props.addRandomMessage}>Add Message</button>
     </div>
   );
 }
 
 export const WithInput = () => {
-    const [chatState, actions] = useChatState();
-    return <>
-        <h1>With Input</h1>
-        <Chat {...chatState} />
-    </>;
+  const [chatState, actions] = useChatState();
+  return (
+    <>
+      <h1>With Input</h1>
+      <Chat {...chatState} {...actions} />
+    </>
+  );
 };

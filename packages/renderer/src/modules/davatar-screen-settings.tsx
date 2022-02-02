@@ -46,7 +46,7 @@ export default function DavatarSettingsScreen(props: {
         }
       }
     },
-    [settingsVersion],
+    [settingsVersion, props, settings],
   );
   function importExampleKeyPair() {
     dispatch({

@@ -66,7 +66,7 @@ function ProseMirrorEditor(
                 }),
               ];
         },
-        [yDoc, yType, yProviderAwareness, schema]
+        [yType, yProviderAwareness]
     );
     const [yDocToPmDoc] = React.useState(new Map<Y.Doc, ProsemirrorNode<Schema>>());
     const pmDoc = React.useMemo(
@@ -76,7 +76,7 @@ function ProseMirrorEditor(
             yDocToPmDoc.set(yDoc, pmDoc);
             return pmDoc;
         },
-        [yDoc]
+        [yDoc, yDocToPmDoc]
     );
     return <>
         <div style={{whiteSpace: 'pre-wrap'}}>

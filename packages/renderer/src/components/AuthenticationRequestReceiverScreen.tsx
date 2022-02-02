@@ -109,6 +109,8 @@ function AuthenticationRequestReceiverScreen(props: {
       setIdToken(idToken);
     })();
   }, [
+    authenticationSubject.id,
+    authenticationSubject.signer,
     authenticationRequest.client_id,
     authenticationRequest.nonce,
     formClaims,
@@ -199,7 +201,7 @@ function ClaimsFormInputs(props: {
   );
   React.useEffect(() => {
     props.onChange(state);
-  }, [state]);
+  }, [state, props]);
   return (
     <>
       <dl>

@@ -36,7 +36,7 @@ export function QuillEditor(props: {
             // quill.setText('');
             setQuill(quill);
         },
-        [editorElRef.current]
+        [props, props.placeholder]
     );
     React.useEffect(
         () => {
@@ -44,7 +44,7 @@ export function QuillEditor(props: {
                 props.onQuill(quill);
             }
         },
-        [quill],
+        [quill, props],
     );
     return <>
         <QuillContainer ref={editorElRef}></QuillContainer>

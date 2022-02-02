@@ -15,13 +15,13 @@ export const ProsemirrorYjsEditor = function (props: {
     const { yjsDoc, awareness } = props;
     const prosemirrorNode = React.useMemo(
         () => yDocToProsemirror(schema, yjsDoc),
-        [yDocToProsemirror, schema, yjsDoc],
+        [yjsDoc],
     );
     React.useEffect(
         () => {
             console.log('ProsemirrorYjsEditor yjsDoc changed', yjsDoc, prosemirrorNode);
         },
-        [yjsDoc],
+        [yjsDoc, prosemirrorNode],
     );
     const yProviderAwareness: Awareness|undefined = props.awareness;
     const yType = React.useMemo(() => {
@@ -40,7 +40,7 @@ export const ProsemirrorYjsEditor = function (props: {
                 }),
               ].concat();
         },
-        [yType, yProviderAwareness, schema]
+        [yType, yProviderAwareness]
     );
     const state = React.useMemo(
         () => {
@@ -50,7 +50,7 @@ export const ProsemirrorYjsEditor = function (props: {
                 plugins,
             });
         },
-        [prosemirrorNode, schema, plugins]
+        [prosemirrorNode, plugins]
     );
     return <>
         <ProsemirrorEditor

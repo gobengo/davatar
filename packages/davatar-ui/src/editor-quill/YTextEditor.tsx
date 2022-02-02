@@ -27,7 +27,7 @@ export function YTextEditor(props: {
                 setBinding(null);
             };
         },
-        [quill],
+        [quill, props.awareness, props.text],
     );
     return <>
         <QuillEditor

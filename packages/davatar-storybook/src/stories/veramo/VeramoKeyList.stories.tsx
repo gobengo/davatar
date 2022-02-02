@@ -51,7 +51,7 @@ function VeramoKeyList(props: {
           setNeedsKmsFetch(false);
         })();
     },
-    [needsKmsFetch],
+    [needsKmsFetch, kms],
   );
   const createEd25519Key = React.useCallback(
       () => {

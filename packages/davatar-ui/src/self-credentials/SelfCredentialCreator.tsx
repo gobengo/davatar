@@ -39,7 +39,7 @@ export const SelfCredentialCreator = function (
         setCredential(null);
       }
     })();
-  }, [name]);
+  }, [name, props]);
   return (
     <>
       <h1>SelfCredentialCreator</h1>

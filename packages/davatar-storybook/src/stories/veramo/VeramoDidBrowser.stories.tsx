@@ -88,7 +88,7 @@ function VeramoDidBrowser(props: {
           setNeedsFetch(true);
         })();
       },
-      [kms],
+      [veramoAgent],
   );
   return (
     <>
