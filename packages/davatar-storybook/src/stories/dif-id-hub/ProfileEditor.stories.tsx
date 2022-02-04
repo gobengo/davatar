@@ -1,6 +1,10 @@
 import React from "react";
 import type { ComponentStory, ComponentMeta } from "@storybook/react";
 import { NameEditor } from "../../components/NameEditor";
+// import * as dagPB from '@ipld/dag-pb';
+// import canonicalize from "canonicalize";
+// import { CID } from 'multiformats/cid';
+// import { sha256 } from 'multiformats/hashes/sha2';
 
 interface ISchemaOrgPerson {
   "@context": "http://schema.org";
@@ -26,18 +30,23 @@ interface IProfileWrite {
     }
 }
 
-function createProfileWrite(profile: IProfile): IProfileWrite {
-    const cid = 'todo';
-    const write: IProfileWrite = {
-        data: profile,
-        descriptor: {
-            cid,
-            method: 'ProfileWrite',
-            dataFormat: 'json',
-        },
-    };
-    return write;
-}
+// async function createProfileWrite(profile: IProfile): Promise<IProfileWrite> {
+//     const profileString = canonicalize(profile);
+//     const profileDagPbBytes = dagPB.encode({
+//         Data: (new TextEncoder).encode(profileString),
+//         Links: [],
+//     });
+//     const cid = CID.create(1, dagPB.code, await sha256.digest(profileDagPbBytes));
+//     const write: IProfileWrite = {
+//         data: profile,
+//         descriptor: {
+//             cid: cid.toString(),
+//             method: 'ProfileWrite',
+//             dataFormat: 'json',
+//         },
+//     };
+//     return write;
+// }
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 function ProfileEditor(props: {
@@ -126,9 +135,10 @@ export const SampleProfileEditor = function () {
       },
     ],
   });
-  const profileWrite = React.useMemo(
+  const [profileWrite, setProfileWrite] = React.useState<null|IProfileWrite>(null);
+  React.useEffect(
       () => {
-          return createProfileWrite(profile);
+        //   createProfileWrite(profile).then(setProfileWrite);
       },
       [profile],
   );
