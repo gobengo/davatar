@@ -12,19 +12,26 @@ export interface IChatMessage {
   mediaType: 'text/plain';
 }
 
+export interface INameChange {
+  type: 'NameChange',
+  object: Pick<IChatParticipant, 'id'|'name'>,
+  prev: Pick<IChatParticipant, 'name'>,
+}
+
 export interface IChatState {
   participants: IChatParticipant[];
   messages: Array<Promise<IChatMessage> | IChatMessage>;
+  events: Array<INameChange>;
 }
 
 export type IChatMessageContent = Omit<IChatMessage, 'id'|'attributedTo'>
 
 export interface IChatActions {
-    onMessage?(action: IChatMessageContent): void;
+    onMessageContent(action: IChatMessageContent): void;
 }
 
 // eslint-disable-next-line @typescript-eslint/ban-types
-export const Chat = function (props: IChatState & IChatActions) {
+export const Chat = function (props: IChatState & Partial<IChatActions>) {
   return (
     <>
       <header>
@@ -35,6 +42,18 @@ export const Chat = function (props: IChatState & IChatActions) {
           <li key={participant.id || index}>{participant.name}</li>
         ))}
       </ul>
+      {props.events.length ? <>
+        <header>
+          <strong>Events</strong>
+        </header>
+        <ul>
+        {props.events.map(
+          (event, index) => <li key={index}>
+            <ChatEvent event={event} />
+          </li>
+        )}
+        </ul>
+      </> : <></>}
       <header>
         <strong>Messages</strong>
       </header>
@@ -45,18 +64,18 @@ export const Chat = function (props: IChatState & IChatActions) {
           </li>
         ))}
       </ul>
-      {props.onMessage ? <>
+      {props.onMessageContent ? <>
       <header>
           <strong>Add a Message</strong>
       </header>
-        <PlaintextMessageForm onMessage={props.onMessage} />
+        <PlaintextMessageForm onMessageContent={props.onMessageContent} />
       </> : <></>}
     </>
   );
 };
 
 function PlaintextMessageForm(props: {
-    onMessage(content: IChatMessageContent): void;
+  onMessageContent(content: IChatMessageContent): void;
 }) {
     const messageTextRef = React.useRef<HTMLInputElement|null>(null);
     const onFormSubmit = React.useCallback(
@@ -70,7 +89,7 @@ function PlaintextMessageForm(props: {
                 mediaType: 'text/plain' as const,
                 content: messageText,
             };
-            props.onMessage(content);
+            props.onMessageContent(content);
             if (messageTextRef.current) {
               messageTextRef.current.value = '';
             }
@@ -95,5 +114,22 @@ export const Message = function (props: {
   if (!message) {
     return <>'Loading&hellip;'</>;
   }
-  return <>{message?.content}</>;
+  return <>
+    <strong>{message.attributedTo.name}</strong>:
+    <div>{message?.content}</div>
+  </>;
 };
+
+function ChatEvent(props: {
+  event: INameChange
+}) {
+  const { event } = props;
+  switch (event.type) {
+    case "NameChange":
+      return <>
+      {event.prev.name} is now known as {event.object.name}
+      </>;
+    default:
+      throw new Error(`unexpected event type=${event.type}`);
+  }
+}
