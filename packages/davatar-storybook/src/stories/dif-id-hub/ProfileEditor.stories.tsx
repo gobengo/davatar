@@ -16,6 +16,29 @@ interface IProfile {
   descriptors: [IProfileDescriptor, ...IProfileDescriptor[]];
 }
 
+interface IProfileWrite {
+    data?: IProfile
+    descriptor: {
+        cid: string
+        method: 'ProfileWrite'
+        dataFormat: 'json'
+        encryption?: 'jwe'
+    }
+}
+
+function createProfileWrite(profile: IProfile): IProfileWrite {
+    const cid = 'todo';
+    const write: IProfileWrite = {
+        data: profile,
+        descriptor: {
+            cid,
+            method: 'ProfileWrite',
+            dataFormat: 'json',
+        },
+    };
+    return write;
+}
+
 // eslint-disable-next-line @typescript-eslint/ban-types
 function ProfileEditor(props: {
   profile: IProfile;
@@ -103,15 +126,24 @@ export const SampleProfileEditor = function () {
       },
     ],
   });
+  const profileWrite = React.useMemo(
+      () => {
+          return createProfileWrite(profile);
+      },
+      [profile],
+  );
   return (
     <>
       <h2>Edit Your Profile</h2>
-      <div style={{ display: "flex" }}>
+      <div>
         <div>
           <ProfileEditor profile={profile} onChange={setProfile} />
         </div>
         <div>
+          <h3>Profile</h3>
           <ProfilePreview profile={profile}></ProfilePreview>
+          <h3>ProfileWrite</h3>
+          <pre>{JSON.stringify(profileWrite, null, 2)}</pre>
         </div>
       </div>
       <h2>Example Profile</h2>
