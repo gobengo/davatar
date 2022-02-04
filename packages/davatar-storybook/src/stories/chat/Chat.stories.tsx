@@ -9,6 +9,7 @@ import type {
   INameChange,
 } from "davatar-ui";
 import { Chat } from "davatar-ui";
+import { NameEditor } from "/@/components/NameEditor";
 
 const bengo: IChatParticipant = {
   name: "bengo",
@@ -248,33 +249,6 @@ export const NameChanges = () => {
     </>
   );
 };
-
-function NameEditor(props: {
-  initialValue?: { name: string };
-  onSave(entity: { name: string }): void;
-}) {
-  const { onSave } = props;
-  const nameInputRef = React.useRef<null | HTMLInputElement>(null);
-  const onSubmit = React.useCallback(
-    (event: React.FormEvent<HTMLFormElement>) => {
-      event.preventDefault();
-      const nameValue = nameInputRef.current?.value;
-      if (typeof nameValue !== "string") {
-        throw new Error("failed to determine name from input");
-      }
-      onSave({ name: nameValue });
-    },
-    [onSave]
-  );
-  return (
-    <>
-      <form onSubmit={onSubmit}>
-        <input type="text" name="name" required ref={nameInputRef} />
-        <input type="submit" value="save" />
-      </form>
-    </>
-  );
-}
 
 const SingleParticipant = (props: {
   // participant id
