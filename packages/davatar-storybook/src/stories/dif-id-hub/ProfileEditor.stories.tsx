@@ -1,10 +1,10 @@
 import React from "react";
 import type { ComponentStory, ComponentMeta } from "@storybook/react";
 import { NameEditor } from "../../components/NameEditor";
-// import * as dagPB from '@ipld/dag-pb';
-// import canonicalize from "canonicalize";
-// import { CID } from 'multiformats/cid';
-// import { sha256 } from 'multiformats/hashes/sha2';
+import * as dagPB from '@ipld/dag-pb';
+import canonicalize from "canonicalize";
+import { CID } from 'multiformats/cid';
+import { sha256 } from 'multiformats/hashes/sha2';
 
 interface ISchemaOrgPerson {
   "@context": "http://schema.org";
@@ -30,23 +30,23 @@ interface IProfileWrite {
     }
 }
 
-// async function createProfileWrite(profile: IProfile): Promise<IProfileWrite> {
-//     const profileString = canonicalize(profile);
-//     const profileDagPbBytes = dagPB.encode({
-//         Data: (new TextEncoder).encode(profileString),
-//         Links: [],
-//     });
-//     const cid = CID.create(1, dagPB.code, await sha256.digest(profileDagPbBytes));
-//     const write: IProfileWrite = {
-//         data: profile,
-//         descriptor: {
-//             cid: cid.toString(),
-//             method: 'ProfileWrite',
-//             dataFormat: 'json',
-//         },
-//     };
-//     return write;
-// }
+async function createProfileWrite(profile: IProfile): Promise<IProfileWrite> {
+    const profileString = canonicalize(profile);
+    const profileDagPbBytes = dagPB.encode({
+        Data: (new TextEncoder).encode(profileString),
+        Links: [],
+    });
+    const cid = CID.create(1, dagPB.code, await sha256.digest(profileDagPbBytes));
+    const write: IProfileWrite = {
+        data: profile,
+        descriptor: {
+            cid: cid.toString(),
+            method: 'ProfileWrite',
+            dataFormat: 'json',
+        },
+    };
+    return write;
+}
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 function ProfileEditor(props: {
@@ -122,8 +122,6 @@ const Template: ComponentStory<typeof ProfileEditor> = (args) => {
   return <ProfileEditor {...args} />;
 };
 
-export const WithDefaultProps = Template.bind({});
-
 export const SampleProfileEditor = function () {
   const [profile, setProfile] = React.useState<IProfile>({
     type: "Profile",
@@ -138,7 +136,7 @@ export const SampleProfileEditor = function () {
   const [profileWrite, setProfileWrite] = React.useState<null|IProfileWrite>(null);
   React.useEffect(
       () => {
-        //   createProfileWrite(profile).then(setProfileWrite);
+          createProfileWrite(profile).then(setProfileWrite);
       },
       [profile],
   );
@@ -156,8 +154,6 @@ export const SampleProfileEditor = function () {
           <pre>{JSON.stringify(profileWrite, null, 2)}</pre>
         </div>
       </div>
-      <h2>Example Profile</h2>
-      <ExampleProfile />
     </>
   );
 };

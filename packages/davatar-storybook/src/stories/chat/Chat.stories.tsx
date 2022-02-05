@@ -9,7 +9,7 @@ import type {
   INameChange,
 } from "davatar-ui";
 import { Chat } from "davatar-ui";
-import { NameEditor } from "/@/components/NameEditor";
+import { NameEditor } from "../../components/NameEditor";
 
 const bengo: IChatParticipant = {
   name: "bengo",
