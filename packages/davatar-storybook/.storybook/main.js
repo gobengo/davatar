@@ -6,6 +6,7 @@ const commonjs = require('@rollup/plugin-commonjs');
 const analyze = require('rollup-plugin-analyzer')
 const inject = require('@rollup/plugin-inject');
 const path = require('path');
+const { viteCommonjs } = require('@originjs/vite-plugin-commonjs');
 
 module.exports = {
   "stories": [
@@ -30,6 +31,7 @@ module.exports = {
         ...config.build?.rollupOptions,
         plugins: [
           resolve(),
+          viteCommonjs(),
           ...config.build?.rollupOptions?.plugins || [],
         ],
         external: builtins,
