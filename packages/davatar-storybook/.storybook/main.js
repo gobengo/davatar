@@ -55,9 +55,6 @@ module.exports = {
         ...config.build?.rollupOptions,
         plugins: [
           ...config.build?.rollupOptions?.plugins || [],
-          rollupNodeGlobals({
-            process: true,
-          }),
         ],
         external: builtins,
         output: {
