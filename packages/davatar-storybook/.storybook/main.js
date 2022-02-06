@@ -36,7 +36,7 @@ module.exports = {
     config.plugins = [
 
       rollupCleanStrictViolations(),
-      resolve({ preferBuiltins: false }),
+      resolve({ browser: true, preferBuiltins: false }),
 
       // viteCommonjs(),
 
