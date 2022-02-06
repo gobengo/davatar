@@ -51,6 +51,10 @@ module.exports = {
     config.build = {
       ...config.build,
       target: 'es2020',
+      commonjsOptions: {
+        ...config.build?.commonjsOptions || {},
+        exclude: []
+      },
       rollupOptions: {
         ...config.build?.rollupOptions,
         plugins: [
@@ -68,11 +72,11 @@ module.exports = {
         ...config.optimizeDeps?.esBuildOptions,
         plugins: [
           ...(config.optimizeDeps?.esBuildOptions?.plugins || []),
-          NodeModulesPolyfillPlugin(),
-          NodeGlobalsPolyfillPlugin({
-            buffer: true,
-            process: true,
-          }),
+          // NodeModulesPolyfillPlugin(),
+          // NodeGlobalsPolyfillPlugin({
+          //   buffer: true,
+          //   process: true,
+          // }),
         ],
       },
       exclude: [
