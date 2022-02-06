@@ -8,6 +8,7 @@ const inject = require('@rollup/plugin-inject');
 const path = require('path');
 const { viteCommonjs } = require('@originjs/vite-plugin-commonjs');
 const rollupNodePolyFill = require('rollup-plugin-node-polyfills');
+const rollupNodeGlobals = require('rollup-plugin-node-globals');
 const {
   NodeModulesPolyfillPlugin,
 } = require("@esbuild-plugins/node-modules-polyfill");
@@ -33,12 +34,13 @@ module.exports = {
   },
   async viteFinal(config, { configType }) {
     config.plugins = [
+
       rollupCleanStrictViolations(),
       resolve({ preferBuiltins: false }),
 
-      viteCommonjs(),
+      // viteCommonjs(),
 
-      // rollupNodePolyFill(),
+      rollupNodePolyFill(),
       ...config.plugins,
       inject({
         modules: {
@@ -53,6 +55,9 @@ module.exports = {
         ...config.build?.rollupOptions,
         plugins: [
           ...config.build?.rollupOptions?.plugins || [],
+          rollupNodeGlobals({
+            process: true,
+          }),
         ],
         external: builtins,
         output: {
@@ -69,6 +74,7 @@ module.exports = {
           NodeModulesPolyfillPlugin(),
           NodeGlobalsPolyfillPlugin({
             buffer: true,
+            process: true,
           }),
         ],
       },
@@ -79,7 +85,8 @@ module.exports = {
     config.resolve.alias.buffer = require.resolve("buffer-es6");
     config.resolve.alias.stream = require.resolve("stream-browserify");
     config.resolve.alias.http = require.resolve('stream-http');
-    config.resolve.alias.mortice = require.resolve('mortice/lib/browser');
+    config.resolve.alias.cluster = require.resolve('./cluster-browser.js');
+    // config.resolve.alias.mortice = require.resolve('mortice/lib/browser');
     config.resolve.alias.url = require.resolve('rollup-plugin-node-polyfills/polyfills/url');
     // config.resolve.alias.util = require.resolve('rollup-plugin-node-polyfills/polyfills/util');
     config.resolve.alias.os = require.resolve("os-browserify/browser");

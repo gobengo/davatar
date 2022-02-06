@@ -38,6 +38,7 @@
     "libp2p-mplex": "^0.10.7",
     "libp2p-noise": "^4.0.0",
     "libp2p-tcp": "^0.17.2",
+    "libp2p-webrtc-star": "^0.25.0",
     "multibase": "^4.0.6",
     "multicodec": "^3.2.1",
     "multiformats": "^9.6.3",
@@ -61,6 +62,7 @@
   "devDependencies": {
     "@babel/core": "^7.16.10",
     "@esbuild-plugins/node-globals-polyfill": "^0.1.1",
+    "@esbuild-plugins/node-modules-polyfill": "^0.1.4",
     "@originjs/vite-plugin-commonjs": "^1.0.2",
     "@storybook/addon-actions": "^6.5.0-alpha.21",
     "@storybook/addon-essentials": "^6.5.0-alpha.21",
@@ -74,6 +76,7 @@
     "os-browserify": "^0.3.0",
     "rollup-plugin-analyzer": "^4.0.0",
     "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-node-globals": "^1.4.0",
     "storybook-builder-vite": "^0.1.13",
     "typescript": "^4.5.5",
     "vite": "2.6.13"
