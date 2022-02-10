@@ -1,6 +1,6 @@
 import type * as Y from "yjs";
 import * as React from "react";
-import { QuillEditor } from "./QuillEditor";
+// import { QuillEditor } from "./QuillEditor";
 import { QuillBinding } from 'y-quill';
 import type Quill from "quill";
 import type { Awareness } from "y-protocols/awareness";
@@ -30,10 +30,10 @@ export function YTextEditor(props: {
         [quill, props.awareness, props.text],
     );
     return <>
-        <QuillEditor
+        {/* <QuillEditor
             placeholder="..."
             toolbar={false}
             onQuill={setQuill}
-            />
+            /> */}
     </>;
 }
